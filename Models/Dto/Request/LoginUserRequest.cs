@@ -2,7 +2,7 @@
 
 namespace SocialMedia.Models.Dto.Request
 {
-  public class RegisterRequest
+  public class LoginUserRequest
   {
     [Required(ErrorMessage = "Email không được để trống")]
     [EmailAddress(ErrorMessage = "Email không hợp lệ")]
