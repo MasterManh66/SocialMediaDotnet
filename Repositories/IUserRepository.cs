@@ -7,5 +7,7 @@ namespace SocialMedia.Repositories
     Task<User?> GetUserByEmailAsync(string email);
     Task AddUserAsync(User user);
     Task SaveChangesAsync();
+    Task UpdateAsync(User user);
+    Task<User?> GetByEmailAsync(string email);
   }
 }

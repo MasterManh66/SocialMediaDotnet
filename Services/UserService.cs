@@ -15,13 +15,24 @@ namespace SocialMedia.Services
     private readonly IRoleRepository _roleRepository;
     private readonly RedisService _redisService;
     private readonly IJwtService _jwtService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public UserService(IUserRepository userRepository, IRoleRepository roleRepository, RedisService redisService, IJwtService jwtService)
+    public UserService(IUserRepository userRepository, IRoleRepository roleRepository, RedisService redisService,
+                      IJwtService jwtService, IHttpContextAccessor httpContextAccessor)
     {
       _userRepository = userRepository;
       _roleRepository = roleRepository;
       _redisService = redisService;
       _jwtService = jwtService;
+      _httpContextAccessor = httpContextAccessor;
+    }
+    public string? GetCurrentUserEmail()
+    {
+      return _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Email)?.Value;
+    }
+    public Task<User?> GetUserByEmailAsync(string email)
+    {
+      return _userRepository.GetByEmailAsync(email);
     }
 
     public async Task<ApiResponse<string>> RegisterUser(RegisterUserRequest request)
@@ -166,43 +177,34 @@ namespace SocialMedia.Services
       });
     }
 
-    //public async Task<ApiResponse<string>> ChangePassword(ChangePasswordRequest request)
-    //{
-    //  //check request
-    //  if (string.IsNullOrWhiteSpace(request.NewPassword) || string.IsNullOrWhiteSpace(request.ConfirmPassword))
-    //  {
-    //    return new ApiResponse<string>(400, "Mật khẩu mới hoặc xác nhận mật khẩu đang là khoảng trống", null);
-    //  }
-    //  if (request.NewPassword != request.ConfirmPassword)
-    //  {
-    //    return new ApiResponse<string>(400, "Mật khẩu xác nhận không khớp", null);
-    //  }
-    //  //check token
-    //  var claimsPrincipal = _jwtService.ValidateToken(token);
-    //  if (claimsPrincipal == null)
-    //  {
-    //    return new ApiResponse<string>(401, "Token không hợp lệ!", null);
-    //  }
-
-    //  // Lấy UserId từ token
-    //  var userId = claimsPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-    //  if (string.IsNullOrEmpty(userId))
-    //  {
-    //    return new ApiResponse<string>(401, "Không tìm thấy ID người dùng trong token!", null);
-    //  }
-
-    //  // Tìm user trong database (giả sử có UserService)
-    //  var user = await _userService.GetUserByIdAsync(userId);
-    //  if (user == null)
-    //  {
-    //    return new ApiResponse<string>(404, "Người dùng không tồn tại!", null);
-    //  }
-
-    //  // Cập nhật mật khẩu mới
-    //  user = _passwordHasher.HashPassword(request.NewPassword);
-    //  await _userService.UpdateUserAsync(user);
-
-    //  return new ApiResponse<string>(200, "Mật khẩu đã được thay đổi thành công", null);
-    //}
+    public async Task<ApiResponse<string>> ChangePassword(ChangePasswordRequest request)
+    {
+      //check request
+      if (string.IsNullOrWhiteSpace(request.NewPassword) || string.IsNullOrWhiteSpace(request.ConfirmPassword))
+      {
+        return new ApiResponse<string>(400, "Mật khẩu mới hoặc xác nhận mật khẩu đang là khoảng trống", null);
+      }
+      if (request.NewPassword != request.ConfirmPassword)
+      {
+        return new ApiResponse<string>(400, "Mật khẩu xác nhận không khớp", null);
+      }
+      //get user email from token
+      var email = GetCurrentUserEmail();
+      if (string.IsNullOrEmpty(email))
+      {
+        return new ApiResponse<string>(401, "Không thể xác thực người dùng!", null);
+      }
+      //find user by email
+      var user = await GetUserByEmailAsync(email);
+      if (user == null)
+      {
+        return new ApiResponse<string>(404, "Người dùng không tồn tại!", null);
+      }
+      //hash password
+      user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+      //update DB
+      await _userRepository.UpdateAsync(user);
+      return new ApiResponse<string>(200, "Mật khẩu đã được thay đổi thành công", null);
+    }
   }
 }

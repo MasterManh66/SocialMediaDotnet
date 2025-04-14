@@ -6,6 +6,7 @@ using SocialMedia.Data;
 using SocialMedia.Repositories;
 using StackExchange.Redis;
 using SocialMedia.Services;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 var redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? throw new ArgumentNullException("Redis connection string is missing");
@@ -18,7 +19,7 @@ var jwtSecretKey = Encoding.UTF8.GetBytes(jwtKey);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
@@ -26,6 +27,32 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<RedisService>();
 
+builder.Services.AddSwaggerGen(c =>
+{
+  c.SwaggerDoc("v1", new OpenApiInfo { Title = "API Social Media", Version = "v1.0", Description = "My Api Is Used Test Api" });
+  c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+  {
+    Name = "Authorization",
+    In = ParameterLocation.Header,
+    Type = SecuritySchemeType.Http,  
+    Scheme = "bearer",                    
+    BearerFormat = "JWT"
+  });
+  c.AddSecurityRequirement(new OpenApiSecurityRequirement
+  {
+    {
+      new OpenApiSecurityScheme
+      {
+        Reference = new OpenApiReference
+        {
+          Type = ReferenceType.SecurityScheme,
+          Id = "Bearer"
+        }
+      },
+      new string[] {}
+    }
+  });
+});
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -39,6 +66,8 @@ builder.Services
       {
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
+        ValidateIssuer = false,
+        ValidateAudience = false,
         IssuerSigningKey = new SymmetricSecurityKey(jwtSecretKey)
       };
     });
@@ -49,11 +78,13 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+  app.UseSwagger();
+  app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

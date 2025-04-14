@@ -10,6 +10,6 @@ namespace SocialMedia.Services
     Task<ApiResponse<AuthResponse>> VerifyOtp(AuthRequest request);
     Task<ApiResponse<ForgetPasswordResponse>> ForgetPassword(ForgetPasswordRequest request);
     Task<ApiResponse<VerifyForgetPasswordResponse>> VerifyForgetPasword(VerifyForgetPasswordRequest request);
-    //Task<ApiResponse<string>> ChangePassword(ChangePasswordRequest request);
+    Task<ApiResponse<string>> ChangePassword(ChangePasswordRequest request);
   }
 }

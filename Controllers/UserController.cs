@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SocialMedia.Models.Dto.Request;
 using SocialMedia.Services;
 
@@ -83,6 +84,22 @@ namespace SocialMedia.Controllers
         return BadRequest(ModelState);
       }
       var response = await _userService.VerifyForgetPasword(request);
+      if (response.Status == 200)
+      {
+        return Ok(response);
+      }
+      return StatusCode(response.Status, response);
+    }
+
+    [Authorize]
+    [HttpPut("ChangePassword")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+      if (!ModelState.IsValid)
+      {
+        return BadRequest(ModelState);
+      }
+      var response = await _userService.ChangePassword(request);
       if (response.Status == 200)
       {
         return Ok(response);
