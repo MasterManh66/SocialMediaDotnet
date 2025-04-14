@@ -106,5 +106,29 @@ namespace SocialMedia.Controllers
       }
       return StatusCode(response.Status, response);
     }
+
+    [Authorize]
+    [HttpGet("GetUser")]
+    public async Task<IActionResult> GetUser()
+    {
+      var response = await _userService.GetUser();
+      if (response.Status == 200)
+      {
+        return Ok(response);
+      }
+      return StatusCode(response.Status, response);
+    }
+
+    [Authorize]
+    [HttpPut("UpdateUser")]
+    public async Task<IActionResult> UpdateUser([FromBody] UserRequest request)
+    {
+      var response = await _userService.UpdateUser(request);
+      if (response.Status == 200)
+      {
+        return Ok(response);
+      }
+      return StatusCode(response.Status, response);
+    }
   }
 }

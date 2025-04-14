@@ -206,5 +206,98 @@ namespace SocialMedia.Services
       await _userRepository.UpdateAsync(user);
       return new ApiResponse<string>(200, "Mật khẩu đã được thay đổi thành công", null);
     }
+
+    public async Task<ApiResponse<UserResponse>> GetUser()
+    {
+      //check token
+      var email = GetCurrentUserEmail();
+      if (string.IsNullOrEmpty(email))
+      {
+        return new ApiResponse<UserResponse>(401, "Không thể xác thực người dùng!", null);
+      }
+      //get user by email
+      var user = await GetUserByEmailAsync(email);
+      if (user == null)
+      {
+        return new ApiResponse<UserResponse>(404, "Người dùng không tồn tại!", null);
+      }
+      return new ApiResponse<UserResponse>(200, "Lấy thành công thông tin của bạn", new UserResponse
+      {
+        Id = user.Id,
+        FirstName = user.FirstName,
+        LastName = user.LastName,
+        FullName = user.FirstName + " " + user.LastName,
+        Email = user.Email,
+        Address = user.Address,
+        Job = user.Job,
+        DateOfBirth = user.DateOfBirth,
+        Gender = user.Gender
+      });
+    }
+
+    public async Task<ApiResponse<UserResponse>> UpdateUser(UserRequest request)
+    {
+      //check user
+      var enail = GetCurrentUserEmail();
+      if (string.IsNullOrEmpty(enail))
+      {
+        return new ApiResponse<UserResponse>(401, "Không thể xác thực người dùng!", null);
+      }
+      var user = await GetUserByEmailAsync(enail);
+      if (user == null)
+      {
+        return new ApiResponse<UserResponse>(404, "Người dùng không tồn tại!", null);
+      }
+      //update user
+      bool isUpdated = false;
+      if (!string.IsNullOrEmpty(request.FirstName) && request.FirstName != user.FirstName)
+      {
+        user.FirstName = request.FirstName;
+        isUpdated = true;
+      }
+      if (!string.IsNullOrEmpty(request.LastName) && request.LastName != user.LastName)
+      {
+        user.LastName = request.LastName;
+        isUpdated = true;
+      }
+      if (!string.IsNullOrEmpty(request.Address) && request.Address != user.Address)
+      {
+        user.Address = request.Address;
+        isUpdated = true;
+      }
+      if (!string.IsNullOrEmpty(request.Job) && request.Job != user.Job)
+      {
+        user.Job = request.Job;
+        isUpdated = true;
+      }
+      if (!request.DateOfBirth.Equals(default) && request.DateOfBirth != user.DateOfBirth)
+      {
+        user.DateOfBirth = request.DateOfBirth;
+        isUpdated = true;
+      }
+      if (request.Gender != user.Gender)
+      {
+        user.Gender = request.Gender;
+        isUpdated = true;
+      }
+      if (!isUpdated)
+      {
+        return new ApiResponse<UserResponse>(400, "Không có thông tin nào để cập nhật!", null);
+      } else
+      {
+        await _userRepository.UpdateAsync(user);
+        await _userRepository.SaveChangesAsync();
+      }
+      return new ApiResponse<UserResponse>(200, "Cập nhật thành công thông tin của bạn!", new UserResponse
+      {
+        Id = user.Id,
+        FirstName = user.FirstName,
+        LastName = user.LastName,
+        Address = user.Address,
+        Job = user.Job,
+        DateOfBirth = user.DateOfBirth,
+        Gender = user.Gender,
+      });
+    }
   }
 }

@@ -1,9 +1,12 @@
-﻿namespace SocialMedia.Models.Enums
+﻿using System.Text.Json.Serialization;
+
+namespace SocialMedia.Models.Enums
 {
-    public enum GenderEnum
+  [JsonConverter(typeof(JsonStringEnumConverter))]
+  public enum GenderEnum
     {
         Male,
         FeMale,
-        Other
+        Other 
     }
 }
