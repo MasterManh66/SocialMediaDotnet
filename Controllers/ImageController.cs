@@ -27,5 +27,34 @@ namespace SocialMedia.Controllers
       }
       return StatusCode(response.Status, response);
     }
+    [HttpGet("Download")]
+    public async Task<IActionResult> DownloadImage([FromQuery] string imageUrl)
+    {
+      if (string.IsNullOrEmpty(imageUrl))
+      {
+        return BadRequest("URL không hợp lệ!");
+      }
+      var response = await _imageService.DownloadImage(imageUrl);
+      if (response.Status == 200)
+      {
+        return Ok(response);
+      }
+      return StatusCode(response.Status, response);
+    }
+
+    [HttpDelete("Delete")]
+    public async Task<IActionResult> DeleteImage([FromQuery] string imageUrl)
+    {
+      if (string.IsNullOrEmpty(imageUrl))
+      {
+        return BadRequest("URL không hợp lệ!");
+      }
+      var response = await _imageService.DeleteImage(imageUrl);
+      if (response.Status == 200)
+      {
+        return Ok(response);
+      }
+      return StatusCode(response.Status, response);
+    }
   }
 }

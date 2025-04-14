@@ -41,5 +41,31 @@ namespace SocialMedia.Services
       }
       return new ApiResponse<string>(201, "Tải ảnh lên thành công!", $"/Uploads/{fileName} ");
     }
+    public async Task<ApiResponse<string>> DownloadImage(string imageUrl)
+    {
+      var filePath = Path.Combine(_imagePath, imageUrl);
+      if (!System.IO.File.Exists(filePath))
+      {
+        return new ApiResponse<string>(404, "Tệp không tồn tại!", null);
+      }
+      byte[] fileBytes;
+      using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+      using (var memoryStream = new MemoryStream())
+      {
+        await stream.CopyToAsync(memoryStream);
+        fileBytes = memoryStream.ToArray();
+      }
+      return new ApiResponse<string>(200, "Tải ảnh thành công!", imageUrl);
+    }
+    public async Task<ApiResponse<string>> DeleteImage(string imageUrl)
+    {
+      var filePath = Path.Combine(_imagePath, imageUrl);
+      if (!System.IO.File.Exists(filePath))
+      {
+        return new ApiResponse<string>(404, "Tệp không tồn tại!", null);
+      }
+      System.IO.File.Delete(filePath);
+      return new ApiResponse<string>(200, "Xóa ảnh thành công!", imageUrl);
+    }
   }
 }
