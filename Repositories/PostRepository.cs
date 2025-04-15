@@ -47,12 +47,12 @@ namespace SocialMedia.Repositories
       }
       return post;
     }
-    public async Task<List<Post>> SearchPostByKey(string Keyword)
+    public async Task<List<Post>> SearchPostByKey(string keyWord)
     {
       return await _context.Posts
         .Where(p =>
-          EF.Functions.Like(p.Title, $"%{Keyword.ToLower()}%") ||
-          EF.Functions.Like(p.Content, $"%{Keyword.ToLower()}%"))
+          EF.Functions.Like(p.Title, $"%{keyWord.ToLower()}%") ||
+          EF.Functions.Like(p.Content, $"%{keyWord.ToLower()}%"))
         .Include(p => p.User)
         .ToListAsync();
     }

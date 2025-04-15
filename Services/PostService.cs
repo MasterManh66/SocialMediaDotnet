@@ -31,15 +31,16 @@ namespace SocialMedia.Services
     {
       return _userRepository.GetByEmailAsync(email);
     }
-    public async Task<ApiResponse<PostResponse>> CreatePostAsync(PostRequest request)
+    public async Task<ApiResponse<PostResponse>> CreatePost(PostCreateRequest request)
     {
       //check user
-      var enail = GetCurrentUserEmail();
-      if (string.IsNullOrEmpty(enail))
+      var email = GetCurrentUserEmail();
+      if (string.IsNullOrEmpty(email))
       {
         return new ApiResponse<PostResponse>(401, "Không thể xác thực người dùng!", null);
       }
-      var user = await GetUserByEmailAsync(enail);
+      var user = await GetUserByEmailAsync(email);
+      var author = $"{user.FirstName} {user.LastName}";
       if (user == null)
       {
         return new ApiResponse<PostResponse>(404, "Người dùng không tồn tại!", null);
@@ -60,10 +61,187 @@ namespace SocialMedia.Services
         }
         imageUrl = uploadResult.Data;
       }
+      //created Post
+      var newPost = new Post
+      {
+        Title = request.Title,
+        Content = request.Content,
+        ImageUrl = imageUrl,
+        UserId = user.Id,
+        PostStatus = request.PostStatus
+      };
+      //add database
+      await _postRepository.CreatePost(newPost);
       return new ApiResponse<PostResponse>(201, "Bạn đã tạo bài viết thành công!", new PostResponse
         {
-
-        });
+          Id = newPost.Id,
+          Title = newPost.Title,
+          Content = newPost.Content,
+          ImageUrl = newPost.ImageUrl,
+          PostStatus = newPost.PostStatus,
+          UserId = newPost.UserId,
+          Author = author
+      });
+    }
+    public async Task<ApiResponse<PostResponse>> UpdatePost(PostEditRequest request)
+    {
+      //check user
+      var email = GetCurrentUserEmail();
+      if (string.IsNullOrEmpty(email))
+      {
+        return new ApiResponse<PostResponse>(401, "Không thể xác thực người dùng!", null);
+      }
+      var user = await GetUserByEmailAsync(email);
+      var author = $"{user.FirstName} {user.LastName}";
+      if (user == null)
+      {
+        return new ApiResponse<PostResponse>(404, "Người dùng không tồn tại!", null);
+      }
+      //check image
+      string? imageUrl = null;
+      if (request.ImageUrl != null)
+      {
+        var uploadResult = await _imageService.UploadImage(new UploadImageRequest { Image = request.ImageUrl });
+        if (uploadResult.Status != 201)
+        {
+          return new ApiResponse<PostResponse>(400, "Tải ảnh lên thất bại!", null);
+        }
+        imageUrl = uploadResult.Data;
+      }
+      //update post
+      bool isUpdate = false;
+      var post = await _postRepository.GetPostById(request.Id);
+      if (post == null)
+      {
+        return new ApiResponse<PostResponse>(400, $"Bài viết {request.Id} không tồn tại!", null);
+      }
+      if (user.Id != post.UserId)
+      {
+        return new ApiResponse<PostResponse>(403, $"Bạn không có quyền chỉnh sửa bài viết của {user.FirstName + "" + user.LastName}", null);
+      }
+      if (!string.IsNullOrEmpty(request.Title) && request.Title != post.Title)
+      {
+        post.Title = request.Title;
+        isUpdate = true;
+      }
+      if (!string.IsNullOrEmpty(request.Content) && request.Content != post.Content)
+      {
+        post.Content = request.Content;
+        isUpdate = true;
+      }
+      if (!string.IsNullOrEmpty(imageUrl) && imageUrl != post.ImageUrl)
+      {
+        post.ImageUrl = imageUrl;
+        isUpdate = true;
+      }
+      if (request.PostStatus != post.PostStatus)
+      {
+        post.PostStatus = request.PostStatus;
+        isUpdate = true;
+      }
+      if (isUpdate)
+      {
+        await _postRepository.UpdatePost(post);
+      }
+      return new ApiResponse<PostResponse>(200, $"Chỉnh sửa bài viết {post.Id} thành công !", new PostResponse
+      {
+        Id = post.Id,
+        Title = post.Title,
+        Content = post.Content,
+        ImageUrl = post.ImageUrl,
+        PostStatus = post.PostStatus,
+        UserId = post.UserId,
+        Author = author
+      });
+    }
+    public async Task<ApiResponse<List<PostResponse>>> GetPost()
+    {
+      //check user
+      var email = GetCurrentUserEmail();
+      if (string.IsNullOrEmpty(email))
+      {
+        return new ApiResponse<List<PostResponse>>(401, "Không thể xác thực người dùng!", null);
+      }
+      var user = await GetUserByEmailAsync(email);
+      var author = $"{user.FirstName} {user.LastName}";
+      if (user == null)
+      {
+        return new ApiResponse<List<PostResponse>>(404, "Người dùng không tồn tại!", null);
+      }
+      //Get List Post By User
+      var post = await _postRepository.GetPostsByUserId(user.Id);
+      var postResponses = post.Select(p => new PostResponse
+      {
+        Id = p.Id,
+        Title = p.Title,
+        Content = p.Content,
+        ImageUrl = p.ImageUrl,
+        PostStatus = p.PostStatus,
+        UserId = p.UserId,
+        Author = author
+      }).ToList();
+      return new ApiResponse<List<PostResponse>>(200, $"Lấy thành công danh sách bài viết của người dùng {author}!", postResponses);
+    }
+    public async Task<ApiResponse<string>> DeletePost(int postId)
+    {
+      //check user
+      var email = GetCurrentUserEmail();
+      if (string.IsNullOrEmpty(email))
+      {
+        return new ApiResponse<string>(401, "Không thể xác thực người dùng!", null);
+      }
+      var user = await GetUserByEmailAsync(email);
+      if (user == null)
+      {
+        return new ApiResponse<string>(404, "Người dùng không tồn tại!", null);
+      }
+      //check authorize
+      var post = await _postRepository.GetPostById(postId);
+      if (user.Id != post.UserId)
+      {
+        return new ApiResponse<string>(403, $"Bạn không có quyền xoá bài viết {postId} này!", null);
+      }
+      //delete post
+      await _postRepository.DeletePost(postId);
+      return new ApiResponse<string>(200, $"Bạn đã xoá bài viết {postId} thành công!", null);
+    }
+    public async Task<ApiResponse<List<PostResponse>>> SearchPost(string keyWord)
+    {
+      //check user
+      var email = GetCurrentUserEmail();
+      if (string.IsNullOrEmpty(email))
+      {
+        return new ApiResponse<List<PostResponse>>(401, "Không thể xác thực người dùng!", null);
+      }
+      var user = await GetUserByEmailAsync(email);
+      if (user == null)
+      {
+        return new ApiResponse<List<PostResponse>>(404, "Người dùng không tồn tại!", null);
+      }
+      //check request
+      if (string.IsNullOrWhiteSpace(keyWord))
+      {
+        return new ApiResponse<List<PostResponse>>(400, "Từ khoá tìm kiếm đang bị trống hoặc là khoảng trắng!", null);
+      }
+      //search
+      var post = await _postRepository.SearchPostByKey(keyWord);
+      var postResponses = post.Select(p => new PostResponse
+      {
+        Id = p.Id,
+        Title = p.Title,
+        Content = p.Content,
+        ImageUrl = p.ImageUrl,
+        PostStatus = p.PostStatus,
+        UserId = p.UserId,
+        Author = p.User.FirstName + " " + p.User.LastName
+      }).ToList();
+      if (postResponses.Count > 0) 
+      {
+        return new ApiResponse<List<PostResponse>>(200, $"Tìm kiếm theo từ khoá {keyWord} thành công !", postResponses);
+      } else
+      {
+        return new ApiResponse<List<PostResponse>>(204, $"Từ khoá {keyWord} không có kết quả trùng hợp !", postResponses);
+      }
     }
   }
 }

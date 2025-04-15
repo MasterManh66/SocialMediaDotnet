@@ -29,9 +29,12 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IPostRepository, PostRepository>();
+
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<RedisService>();
 
 builder.Services.AddSwaggerGen(c =>
