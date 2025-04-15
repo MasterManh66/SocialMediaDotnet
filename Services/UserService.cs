@@ -15,16 +15,18 @@ namespace SocialMedia.Services
     private readonly IRoleRepository _roleRepository;
     private readonly RedisService _redisService;
     private readonly IJwtService _jwtService;
+    private readonly IImageService _imageService;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public UserService(IUserRepository userRepository, IRoleRepository roleRepository, RedisService redisService,
-                      IJwtService jwtService, IHttpContextAccessor httpContextAccessor)
+                      IJwtService jwtService, IHttpContextAccessor httpContextAccessor, IImageService imageService)
     {
       _userRepository = userRepository;
       _roleRepository = roleRepository;
       _redisService = redisService;
       _jwtService = jwtService;
       _httpContextAccessor = httpContextAccessor;
+      _imageService = imageService;
     }
     public string? GetCurrentUserEmail()
     {
@@ -230,6 +232,7 @@ namespace SocialMedia.Services
         Email = user.Email,
         Address = user.Address,
         Job = user.Job,
+        ImageUrl = user.ImageUrl,
         DateOfBirth = user.DateOfBirth,
         Gender = user.Gender
       });
@@ -237,6 +240,17 @@ namespace SocialMedia.Services
 
     public async Task<ApiResponse<UserResponse>> UpdateUser(UserRequest request)
     {
+      //check image
+      string? imageUrl = null;
+      if (request.ImageUrl != null)
+      {
+        var uploadResult = await _imageService.UploadImage(new UploadImageRequest { Image = request.ImageUrl });
+        if (uploadResult.Status != 201)
+        {
+          return new ApiResponse<UserResponse>(400, "Tải ảnh lên thất bại!", null);
+        }
+        imageUrl = uploadResult.Data;
+      }
       //check user
       var enail = GetCurrentUserEmail();
       if (string.IsNullOrEmpty(enail))
@@ -280,6 +294,11 @@ namespace SocialMedia.Services
         user.Gender = request.Gender;
         isUpdated = true;
       }
+      if (!string.IsNullOrEmpty(imageUrl) && imageUrl != user.ImageUrl)
+      {
+        user.ImageUrl = imageUrl;
+        isUpdated = true;
+      }
       if (!isUpdated)
       {
         return new ApiResponse<UserResponse>(400, "Không có thông tin nào để cập nhật!", null);
@@ -293,8 +312,11 @@ namespace SocialMedia.Services
         Id = user.Id,
         FirstName = user.FirstName,
         LastName = user.LastName,
+        FullName = user.FirstName + "" + user.LastName,
+        Email = user.Email,
         Address = user.Address,
         Job = user.Job,
+        ImageUrl = user.ImageUrl,
         DateOfBirth = user.DateOfBirth,
         Gender = user.Gender,
       });

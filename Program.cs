@@ -8,6 +8,7 @@ using StackExchange.Redis;
 using SocialMedia.Services;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 var redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? throw new ArgumentNullException("Redis connection string is missing");
@@ -20,8 +21,8 @@ var jwtSecretKey = Encoding.UTF8.GetBytes(jwtKey);
 builder.Services.AddControllers()
   .AddJsonOptions(options =>
   {
-    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-  }); ;
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+  });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();

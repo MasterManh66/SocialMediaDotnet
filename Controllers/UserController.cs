@@ -121,7 +121,7 @@ namespace SocialMedia.Controllers
 
     [Authorize]
     [HttpPut("UpdateUser")]
-    public async Task<IActionResult> UpdateUser([FromBody] UserRequest request)
+    public async Task<IActionResult> UpdateUser([FromForm] UserRequest request)
     {
       var response = await _userService.UpdateUser(request);
       if (response.Status == 200)
