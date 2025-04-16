@@ -72,7 +72,6 @@ namespace SocialMedia.Services
       };
       //Add user to database
       await _userRepository.AddUserAsync(newUser);
-      await _userRepository.SaveChangesAsync();
 
       return new ApiResponse<string>(201, "Bạn đã tạo tài khoản mới thành công!", newUser.Email);
     }
@@ -305,7 +304,6 @@ namespace SocialMedia.Services
       } else
       {
         await _userRepository.UpdateAsync(user);
-        await _userRepository.SaveChangesAsync();
       }
       return new ApiResponse<UserResponse>(200, "Cập nhật thành công thông tin của bạn!", new UserResponse
       {

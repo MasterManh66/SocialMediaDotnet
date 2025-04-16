@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using SocialMedia.Models.Enums;
 
 namespace SocialMedia.Models.Entities
@@ -24,10 +25,17 @@ namespace SocialMedia.Models.Entities
 
     public GenderEnum? Gender { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
-    public DateTime UpdatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
     public ICollection<Post> Posts { get; set; } = new List<Post>();
+    public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+    public ICollection<Like> Likes { get; set; } = new List<Like>();
+
+    [InverseProperty("Requester")]
+    public ICollection<Friend> FriendRequested { get; set; } = new List<Friend>();
+    [InverseProperty("Receiver")]
+    public ICollection<Friend> FriendReceived { get; set; } = new List<Friend>();
   }
 }

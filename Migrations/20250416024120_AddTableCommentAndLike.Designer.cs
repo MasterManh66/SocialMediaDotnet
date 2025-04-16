@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SocialMedia.Data;
 
@@ -11,9 +12,11 @@ using SocialMedia.Data;
 namespace SocialMedia.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250416024120_AddTableCommentAndLike")]
+    partial class AddTableCommentAndLike
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -55,38 +58,6 @@ namespace SocialMedia.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Comments");
-                });
-
-            modelBuilder.Entity("SocialMedia.Models.Entities.Friend", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("FriendStatus")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ReceiverId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RequesterId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReceiverId");
-
-                    b.HasIndex("RequesterId");
-
-                    b.ToTable("Friends");
                 });
 
             modelBuilder.Entity("SocialMedia.Models.Entities.Like", b =>
@@ -260,25 +231,6 @@ namespace SocialMedia.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SocialMedia.Models.Entities.Friend", b =>
-                {
-                    b.HasOne("SocialMedia.Models.Entities.User", "Receiver")
-                        .WithMany("FriendReceived")
-                        .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SocialMedia.Models.Entities.User", "Requester")
-                        .WithMany("FriendRequested")
-                        .HasForeignKey("RequesterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Receiver");
-
-                    b.Navigation("Requester");
-                });
-
             modelBuilder.Entity("SocialMedia.Models.Entities.Like", b =>
                 {
                     b.HasOne("SocialMedia.Models.Entities.Post", "Post")
@@ -343,10 +295,6 @@ namespace SocialMedia.Migrations
             modelBuilder.Entity("SocialMedia.Models.Entities.User", b =>
                 {
                     b.Navigation("Comments");
-
-                    b.Navigation("FriendReceived");
-
-                    b.Navigation("FriendRequested");
 
                     b.Navigation("Likes");
 

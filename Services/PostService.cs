@@ -40,7 +40,7 @@ namespace SocialMedia.Services
         return new ApiResponse<PostResponse>(401, "Không thể xác thực người dùng!", null);
       }
       var user = await GetUserByEmailAsync(email);
-      var author = $"{user.FirstName} {user.LastName}";
+      string author = user != null ? $"{user.FirstName} {user.LastName}" : "Anonymous";
       if (user == null)
       {
         return new ApiResponse<PostResponse>(404, "Người dùng không tồn tại!", null);
@@ -92,7 +92,7 @@ namespace SocialMedia.Services
         return new ApiResponse<PostResponse>(401, "Không thể xác thực người dùng!", null);
       }
       var user = await GetUserByEmailAsync(email);
-      var author = $"{user.FirstName} {user.LastName}";
+      string author = user != null ? $"{user.FirstName} {user.LastName}" : "Anonymous";
       if (user == null)
       {
         return new ApiResponse<PostResponse>(404, "Người dùng không tồn tại!", null);
@@ -163,7 +163,7 @@ namespace SocialMedia.Services
         return new ApiResponse<List<PostResponse>>(401, "Không thể xác thực người dùng!", null);
       }
       var user = await GetUserByEmailAsync(email);
-      var author = $"{user.FirstName} {user.LastName}";
+      string author = user != null ? $"{user.FirstName} {user.LastName}" : "Anonymous";
       if (user == null)
       {
         return new ApiResponse<List<PostResponse>>(404, "Người dùng không tồn tại!", null);
@@ -197,6 +197,10 @@ namespace SocialMedia.Services
       }
       //check authorize
       var post = await _postRepository.GetPostById(postId);
+      if (post == null)
+      {
+        return new ApiResponse<string>(400, $"Bài viết {postId} không tồn tại!", null);
+      }
       if (user.Id != post.UserId)
       {
         return new ApiResponse<string>(403, $"Bạn không có quyền xoá bài viết {postId} này!", null);
@@ -233,7 +237,7 @@ namespace SocialMedia.Services
         ImageUrl = p.ImageUrl,
         PostStatus = p.PostStatus,
         UserId = p.UserId,
-        Author = p.User.FirstName + " " + p.User.LastName
+        Author = (p.User != null) ? $"{p.User.FirstName} {p.User.LastName}" : "Anonymous"
       }).ToList();
       if (postResponses.Count > 0) 
       {

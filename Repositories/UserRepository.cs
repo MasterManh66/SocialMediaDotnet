@@ -12,22 +12,26 @@ namespace SocialMedia.Repositories
     {
       _context = context;
     }
-
+    public async Task<User?> GetUserById(int userId)
+    {
+      return await _context.Users
+        .FirstOrDefaultAsync(u => u.Id == userId);
+    }
     public async Task<User?> GetUserByEmailAsync(string email)
     {
       return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
     }
-    public async Task AddUserAsync(User user)
+    public async Task<User?> AddUserAsync(User user)
     {
       await _context.Users.AddAsync(user);
+      await _context.SaveChangesAsync();
+      return user;
     }
-    public async Task UpdateAsync(User user)
+    public async Task<User?> UpdateAsync(User user)
     {
       _context.Users.Update(user);
-    }
-    public async Task SaveChangesAsync()
-    {
       await _context.SaveChangesAsync();
+      return user;
     }
     public async Task<User?> GetByEmailAsync(string email)
     {

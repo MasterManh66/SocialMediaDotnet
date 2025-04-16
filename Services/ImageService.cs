@@ -64,7 +64,7 @@ namespace SocialMedia.Services
       {
         return new ApiResponse<string>(404, "Tệp không tồn tại!", null);
       }
-      System.IO.File.Delete(filePath);
+      await Task.Run(() => System.IO.File.Delete(filePath));
       return new ApiResponse<string>(200, "Xóa ảnh thành công!", imageUrl);
     }
   }
