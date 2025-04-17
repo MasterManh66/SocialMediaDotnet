@@ -10,5 +10,6 @@ namespace SocialMedia.Services
     Task<ApiResponse<List<PostResponse>>> GetPost();
     Task<ApiResponse<string>> DeletePost(int postId);
     Task<ApiResponse<List<PostResponse>>> SearchPost(string keyWord);
+    Task<ApiResponse<List<PostResponse>>> GetTimeLine();
   }
 }

@@ -67,7 +67,7 @@ namespace SocialMedia.Controllers
       return StatusCode(response.Status, response);
     }
     [Authorize]
-    [HttpPost("SearchPost")]
+    [HttpGet("SearchPost")]
     public async Task<IActionResult> SearchPost([FromQuery] string keyWord)
     {
       var response = await _postService.SearchPost(keyWord);

@@ -2,6 +2,7 @@
 using SocialMedia.Models.Dto.Request;
 using SocialMedia.Models.Dto.Response;
 using SocialMedia.Models.Entities;
+using SocialMedia.Models.Enums;
 using SocialMedia.Repositories;
 
 namespace SocialMedia.Services
@@ -12,15 +13,17 @@ namespace SocialMedia.Services
     private readonly IPostRepository _postRepository;
     private readonly IImageService _imageService;
     private readonly IUserRepository _userRepository;
+    private readonly IFriendRepository _friendRepository;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public PostService(IUserRepository userRepository,IUserService userService, IPostRepository postRepository, 
-                      IImageService imageService, IHttpContextAccessor httpContextAccessor)
+                      IImageService imageService, IHttpContextAccessor httpContextAccessor, IFriendRepository friendRepository)
     {
       _userService = userService;
       _postRepository = postRepository;
       _userRepository = userRepository;
       _imageService = imageService;
+      _friendRepository = friendRepository;
       _httpContextAccessor = httpContextAccessor;
     }
     public string? GetCurrentUserEmail()
@@ -246,6 +249,30 @@ namespace SocialMedia.Services
       {
         return new ApiResponse<List<PostResponse>>(204, $"Từ khoá {keyWord} không có kết quả trùng hợp !", postResponses);
       }
+    }
+    public async Task<ApiResponse<List<PostResponse>>> GetTimeLine()
+    {
+      //check user
+      var email = GetCurrentUserEmail();
+      if (string.IsNullOrEmpty(email))
+      {
+        return new ApiResponse<List<PostResponse>>(401, "Không thể xác thực người dùng!", null);
+      }
+      var user = await GetUserByEmailAsync(email);
+      if (user == null)
+      {
+        return new ApiResponse<List<PostResponse>>(404, "Người dùng không tồn tại!", null);
+      }
+      //check post of user
+      var postUser = await _postRepository.GetPostsByUserId(user.Id);
+      var postUserFiltered = postUser.Where(p => p.PostStatus == PostEnum.Public || p.PostStatus == PostEnum.Private || p.PostStatus == PostEnum.Friends).ToList();
+      //check friend of user
+      var friendUser = await _friendRepository.GetFriendsByUserId(user.Id);
+      var listFriend = friendUser.Where(f => f.FriendStatus == FriendEnum.Accepted && ((f.RequesterId == user.Id) || (f.ReceiverId == user.Id))).ToList();
+      //get post of friend
+      var friend = listFriend.Select(f => f.RequesterId == user.Id ? f.ReceiverId : f.RequesterId).ToList();
+      var postFriend = await _postRepository.GetPostsByUserIds(friend);
+      return new ApiResponse<List<PostResponse>>(200, "Lấy thành công danh sách Time Line của bạn!", null);
     }
   }
 }

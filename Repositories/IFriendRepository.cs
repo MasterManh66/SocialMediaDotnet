@@ -7,7 +7,7 @@ namespace SocialMedia.Repositories
     Task<Friend?> GetFriendById(int id);
     Task<List<Friend>> GetFriendsByUserId(int userId);
     Task<Friend?> CreateFriend(Friend friend);
-    //Task<Friend?> UpdateFriend(Friend friend);
+    Task<Friend?> UpdateFriend(Friend friend);
     Task<Friend?> DeleteFriend(int id);
     Task<List<Friend>> SearchFriendByKey(string keyword);
   }

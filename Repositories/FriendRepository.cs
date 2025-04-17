@@ -18,6 +18,8 @@ namespace SocialMedia.Repositories
     public async Task<List<Friend>> GetFriendsByUserId(int userId)
     {
       return await _context.Friends
+        .Include(f => f.Receiver)
+        .Include(f => f.Requester)
         .Where(f => f.RequesterId == userId || f.ReceiverId == userId)
         .ToListAsync();
     }
@@ -27,9 +29,15 @@ namespace SocialMedia.Repositories
       await _context.SaveChangesAsync();
       return friend;
     }
+    public async Task<Friend?> UpdateFriend(Friend friend)
+    {
+      _context.Friends.Update(friend);
+      await _context.SaveChangesAsync();
+      return friend;
+    }
     public async Task<Friend?> DeleteFriend(int friendId)
     {
-      var friend = await _context.Friends.FindAsync(friendId);
+      var friend = await GetFriendById(friendId);
       if (friend == null)
       {
         return null;
