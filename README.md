@@ -15,4 +15,31 @@ Mạng xã hội -> .Net8 + MySQL + EnityFramework
 	12. Controller: Xử lý HTTP request, gọi service trả về response
 13. Code Dto ( request + response ) -> Repositories ( IUserRepository + UserRepository ) -> Service ( IUserService + UserService ) -> Controller
 14. Config docker redis | docker ps -> docker exec -it ContainerId sh -> redis-cli -> keys * -> ttl result(keys)
-15. 
+15. Hoàn thiện User, Post, Comment, Like, Friend
+16. Xuất báo cáo User -> Excel -> dotnet add package ClosedXML -> cấu hình excel -> Dto UserResponse
+
+
+LINQ
+Any : Có ít nhất 1 phần tử thỏa điều kiện không?
+All : Tất cả phần tử đều thỏa điều kiện?
+Where : Lọc theo điều kiện
+Select : Chuyển đổi từng phần tử
+FirstOrDefault : Lấy phần tử đầu tiên hoặc null nếu không có
+Concat : Nối 2 danh sách lại với nhau
+OrderBy : Sắp xếp tăng dần ( ASC mặc định )
+OrderByDescending : Sắp xếp giảm dần ( DESC )
+ToList : Chuyển từ IEnumerable sang List
+
+HttpStatus
+200	: Oki						: Trả về dữ liệu Request thành công (Post, Get, Put)
+201 : Created				: Dữ liệu được tạo mới thành công 
+204 : No Content		: Thành công nhưng ko có giá trị trả về (Put, Delete)
+
+400 : Bad Request		: Dữ liệu sai cú pháp hoặc không hợp lệ ( thiếu or sai định dạng )
+401 : Unauthorized 	: Chưa xác thực ( chưa đăng nhập or token ko hợp lệ )
+403 : Forbidden			: Đã xác thực nhưng không có quyền
+404 : Not Found			: Không tìm thấy tài nguyên 
+409 : Conflict			: Có xung đột trong requets ( trùng tài nguyên )
+422 : Unprocessable Entity : Request đúng cú pháp nhưng dữ liệu không hợp lệ ( validate thất bại )
+
+500 : Internal Server Error : Lỗi server không xác định

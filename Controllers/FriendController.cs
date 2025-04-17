@@ -80,5 +80,16 @@ namespace SocialMedia.Controllers
       }
       return StatusCode(response.Status, response);
     }
+    [Authorize]
+    [HttpGet("SearchUser")]
+    public async Task<IActionResult> SearchFriend([FromQuery] string UserName)
+    {
+      var response = await _friendService.SearchFriend(UserName);
+      if (response.Status == 200)
+      {
+        return Ok(response);
+      }
+      return StatusCode(response.Status, response);
+    }
   }
 }

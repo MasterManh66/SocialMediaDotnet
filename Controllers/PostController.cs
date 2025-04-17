@@ -77,5 +77,16 @@ namespace SocialMedia.Controllers
       }
       return StatusCode(response.Status, response);
     }
+    [Authorize]
+    [HttpGet("GetTimeLine")]
+    public async Task<IActionResult> GetTimeLine()
+    {
+      var response = await _postService.GetTimeLine();
+      if (response.Status != 200)
+      {
+        return Ok(response);
+      }
+      return StatusCode(response.Status, response);
+    }
   }
 }

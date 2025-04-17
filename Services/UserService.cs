@@ -319,5 +319,79 @@ namespace SocialMedia.Services
         Gender = user.Gender,
       });
     }
+
+    public async Task<List<UserReportResponse>> GetWeeklyUserReports()
+    {
+      var oneWeekAgo = DateTime.UtcNow.AddDays(-7);
+      //check user
+      var enail = GetCurrentUserEmail();
+      var user = await GetUserByEmailAsync(enail);
+      var posts = await _context.Posts
+          .Where(p => p.CreatedAt >= oneWeekAgo)
+          .ToListAsync();
+
+      var likes = await _context.Likes
+          .Where(l => l.CreatedAt >= oneWeekAgo)
+          .ToListAsync();
+
+      var comments = await _context.Comments
+          .Where(c => c.CreatedAt >= oneWeekAgo)
+          .ToListAsync();
+
+      var friends = await _context.Friends
+          .Where(f => f.CreatedAt >= oneWeekAgo)
+          .ToListAsync();
+
+      var reports = user.Select(u =>
+      {
+        var fullName = $"{u.FirstName} {u.LastName}";
+
+        var userPosts = posts.Count(p => p.UserId == u.Id);
+        var userLikes = likes.Count(l => l.UserId == u.Id);
+        var userComments = comments.Count(c => c.UserId == u.Id);
+        var userNewFriends = friends.Count(f => f.RequesterId == uId || f.ReceiverId == u.Id);
+
+        return new UserReportResponse
+        {
+          UserId = u.Id,
+          FullName = fullName,
+          TotalPosts = userPosts,
+          TotalLikes = userLikes,
+          TotalComments = userComments,
+          NewFriendsThisWeek = userNewFriends
+        };
+      }).ToList();
+
+      return reports;
+    }
+    public byte[] ExportUserReportsToExcel(List<UserReportResponse> reports)
+    {
+      using var workbook = new XLWorkbook();
+      var worksheet = workbook.Worksheets.Add("User Report");
+
+      worksheet.Cell(1, 1).Value = "User ID";
+      worksheet.Cell(1, 2).Value = "Full Name";
+      worksheet.Cell(1, 3).Value = "Full Name";
+      worksheet.Cell(1, 4).Value = "Posts";
+      worksheet.Cell(1, 5).Value = "Likes";
+      worksheet.Cell(1, 6).Value = "Comments";
+      worksheet.Cell(1, 7).Value = "New Friends";
+
+      for (int i = 0; i < reports.Count; i++)
+      {
+        var r = reports[i];
+        worksheet.Cell(i + 2, 1).Value = r.UserId;
+        worksheet.Cell(i + 2, 2).Value = r.FullName;
+        worksheet.Cell(i + 2, 3).Value = r.Email;
+        worksheet.Cell(i + 2, 4).Value = r.TotalPosts;
+        worksheet.Cell(i + 2, 5).Value = r.TotalLikes;
+        worksheet.Cell(i + 2, 6).Value = r.TotalComments;
+        worksheet.Cell(i + 2, 7).Value = r.NewFriendsThisWeek;
+      }
+
+      using var stream = new MemoryStream();
+      workbook.SaveAs(stream);
+      return stream.ToArray();
+    }
   }
 }

@@ -10,5 +10,6 @@ namespace SocialMedia.Services
     Task<ApiResponse<FriendResponse>> AcceptedFriend(int RequestId);
     Task<ApiResponse<List<FriendResponse>>> FriendOfUser();
     Task<ApiResponse<string>> DeleteFriend(int FriendId);
+    Task<ApiResponse<List<FriendResponse>>> SearchFriend(string UserName);
   }
 }

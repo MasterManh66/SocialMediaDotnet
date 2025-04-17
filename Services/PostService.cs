@@ -43,11 +43,12 @@ namespace SocialMedia.Services
         return new ApiResponse<PostResponse>(401, "Không thể xác thực người dùng!", null);
       }
       var user = await GetUserByEmailAsync(email);
-      string author = user != null ? $"{user.FirstName} {user.LastName}" : "Anonymous";
       if (user == null)
       {
         return new ApiResponse<PostResponse>(404, "Người dùng không tồn tại!", null);
       }
+      var infoUser = await _userRepository.GetUserById(user.Id);
+      string author = $"{infoUser.FirstName} {infoUser.LastName}";
       //check request
       if (string.IsNullOrWhiteSpace(request.Title) || string.IsNullOrWhiteSpace(request.Content))
       {
@@ -95,11 +96,12 @@ namespace SocialMedia.Services
         return new ApiResponse<PostResponse>(401, "Không thể xác thực người dùng!", null);
       }
       var user = await GetUserByEmailAsync(email);
-      string author = user != null ? $"{user.FirstName} {user.LastName}" : "Anonymous";
       if (user == null)
       {
         return new ApiResponse<PostResponse>(404, "Người dùng không tồn tại!", null);
       }
+      var infoUser = await _userRepository.GetUserById(user.Id);
+      string author = $"{infoUser.FirstName} {infoUser.LastName}";
       //check image
       string? imageUrl = null;
       if (request.ImageUrl != null)
@@ -166,13 +168,15 @@ namespace SocialMedia.Services
         return new ApiResponse<List<PostResponse>>(401, "Không thể xác thực người dùng!", null);
       }
       var user = await GetUserByEmailAsync(email);
-      string author = user != null ? $"{user.FirstName} {user.LastName}" : "Anonymous";
+      
       if (user == null)
       {
         return new ApiResponse<List<PostResponse>>(404, "Người dùng không tồn tại!", null);
       }
       //Get List Post By User
       var post = await _postRepository.GetPostsByUserId(user.Id);
+      var infoUser = await _userRepository.GetUserById(user.Id);
+      string author = $"{infoUser.FirstName} {infoUser.LastName}";
       var postResponses = post.Select(p => new PostResponse
       {
         Id = p.Id,
@@ -265,14 +269,31 @@ namespace SocialMedia.Services
       }
       //check post of user
       var postUser = await _postRepository.GetPostsByUserId(user.Id);
-      var postUserFiltered = postUser.Where(p => p.PostStatus == PostEnum.Public || p.PostStatus == PostEnum.Private || p.PostStatus == PostEnum.Friends).ToList();
+      var postUserFiltered = postUser.ToList();
       //check friend of user
       var friendUser = await _friendRepository.GetFriendsByUserId(user.Id);
-      var listFriend = friendUser.Where(f => f.FriendStatus == FriendEnum.Accepted && ((f.RequesterId == user.Id) || (f.ReceiverId == user.Id))).ToList();
+      var listFriend = friendUser.Where(f => f.FriendStatus == FriendEnum.Accepted).ToList();
       //get post of friend
       var friend = listFriend.Select(f => f.RequesterId == user.Id ? f.ReceiverId : f.RequesterId).ToList();
       var postFriend = await _postRepository.GetPostsByUserIds(friend);
-      return new ApiResponse<List<PostResponse>>(200, "Lấy thành công danh sách Time Line của bạn!", null);
+      var postFriendFiltered = postFriend.Where(p => p.PostStatus == PostEnum.Public || p.PostStatus == PostEnum.Friends).ToList();
+      //Concat post of user and friend
+      var allPosts = postUserFiltered.Concat(postFriendFiltered).OrderByDescending(p => p.CreatedAt).ToList();
+      if (!allPosts.Any())
+      {
+        return new ApiResponse<List<PostResponse>>(404, "Timeline không có bài viết mới nào!", null);
+      }
+      var postResponse = allPosts.Select(p => new PostResponse
+      {
+        Id = p.Id,
+        Title = p.Title,
+        Content = p.Content,
+        ImageUrl = p.ImageUrl,
+        UserId = p.UserId,
+        Author = "Anonymus",
+        PostStatus = p.PostStatus
+      }).ToList();
+      return new ApiResponse<List<PostResponse>>(200, "Lấy thành công danh sách Time Line của bạn!", postResponse);
     }
   }
 }

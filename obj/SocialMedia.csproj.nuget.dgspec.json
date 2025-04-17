@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\trantienmanh\\Project\\SocialMediaNetCore\\SocialMedia\\SocialMedia.csproj": {}
+    "D:\\Project\\Net_Core\\SocialMediaDotnet\\SocialMedia.csproj": {}
   },
   "projects": {
-    "C:\\Users\\trantienmanh\\Project\\SocialMediaNetCore\\SocialMedia\\SocialMedia.csproj": {
+    "D:\\Project\\Net_Core\\SocialMediaDotnet\\SocialMedia.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\trantienmanh\\Project\\SocialMediaNetCore\\SocialMedia\\SocialMedia.csproj",
+        "projectUniqueName": "D:\\Project\\Net_Core\\SocialMediaDotnet\\SocialMedia.csproj",
         "projectName": "SocialMedia",
-        "projectPath": "C:\\Users\\trantienmanh\\Project\\SocialMediaNetCore\\SocialMedia\\SocialMedia.csproj",
-        "packagesPath": "C:\\Users\\trantienmanh\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\trantienmanh\\Project\\SocialMediaNetCore\\SocialMedia\\obj\\",
+        "projectPath": "D:\\Project\\Net_Core\\SocialMediaDotnet\\SocialMedia.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "D:\\Project\\Net_Core\\SocialMediaDotnet\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\trantienmanh\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -43,7 +43,8 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "9.0.200"
       },
       "frameworks": {
         "net8.0": {
@@ -52,6 +53,10 @@
             "BCrypt.Net-Next": {
               "target": "Package",
               "version": "[4.0.3, )"
+            },
+            "ClosedXML": {
+              "target": "Package",
+              "version": "[0.104.2, )"
             },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
@@ -109,7 +114,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.408/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.203/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

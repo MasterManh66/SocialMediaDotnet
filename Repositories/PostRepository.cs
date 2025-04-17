@@ -25,6 +25,13 @@ namespace SocialMedia.Repositories
         .Include(p => p.User)
         .ToListAsync();
     }
+    public async Task<List<Post>> GetPostsByUserIds(List<int> userIds)
+    {
+      return await _context.Posts
+          .Include(p => p.User)
+          .Where(p => userIds.Contains(p.UserId))
+          .ToListAsync();
+    }
     public async Task<Post?> CreatePost(Post post)
     {
       await _context.Posts.AddAsync(post);

@@ -312,5 +312,41 @@ namespace SocialMedia.Services
       await _friendRepository.DeleteFriend(pendingRequest.Id);
       return new ApiResponse<string>(200, $"Huỷ kết bạn thành công với người dùng {infoFriend.FirstName} {infoFriend.LastName}", null);
     }
+    public async Task<ApiResponse<List<FriendResponse>>> SearchFriend(string UserName)
+    {
+      //check user
+      var email = GetCurrentUserEmail();
+      if (string.IsNullOrEmpty(email))
+      {
+        return new ApiResponse<List<FriendResponse>>(401, "Không thể xác thực người dùng!", null);
+      }
+      var user = await GetUserByEmailAsync(email);
+      if (user == null)
+      {
+        return new ApiResponse<List<FriendResponse>>(404, "Người dùng không tồn tại!", null);
+      }
+      //check request
+      if (string.IsNullOrWhiteSpace(UserName))
+      {
+        return new ApiResponse<List<FriendResponse>>(400, "Tên người tìm kiếm đang bị trống hoặc là khoảng trắng!", null);
+      }
+      //search
+      var listUser = await _friendRepository.SearchFriendByKey(UserName);
+      var friendResponse = listUser.Select(f =>
+      {
+        var friendUser = f.RequesterId == user.Id ? f.Receiver! : f.Requester!;
+        return new FriendResponse
+        {
+          UserId = friendUser.Id,
+          FullName = $"{friendUser.FirstName} {friendUser.LastName}",
+          Avatar = friendUser.ImageUrl,
+          Address = friendUser.Address,
+          Job = friendUser.Job,
+          Gender = friendUser.Gender,
+          FriendStatus = f.FriendStatus
+        };
+      }).ToList();
+      return new ApiResponse<List<FriendResponse>>(200, $"Tìm kiếm người dùng {UserName} thành công!",  friendResponse);
+    }
   }
 }
