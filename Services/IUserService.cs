@@ -13,6 +13,7 @@ namespace SocialMedia.Services
     Task<ApiResponse<string>> ChangePassword(ChangePasswordRequest request);
     Task<ApiResponse<UserResponse>> GetUser();
     Task<ApiResponse<UserResponse>> UpdateUser(UserRequest request);
-    Task<List<UserReportResponse>> GetWeeklyUserReports();
+    Task<List<UserReportResponse>> ReportOfUser();
+    byte[] ExportUserReportsToExcel(List<UserReportResponse> reports);
   }
 }

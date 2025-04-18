@@ -130,5 +130,20 @@ namespace SocialMedia.Controllers
       }
       return StatusCode(response.Status, response);
     }
+    [Authorize]
+    [HttpGet("ReportOfUser")]
+    public async Task<IActionResult> ExportUserReportToExcel()
+    {
+      var reportData = await _userService.ReportOfUser();
+      if (reportData == null || !reportData.Any())
+      {
+        return NotFound("Người dùng 1 tuần qua không có hoạt động gì mới!");
+      }
+
+      var excelFile = _userService.ExportUserReportsToExcel(reportData);
+      var fileName = $"UserReport_{DateTime.UtcNow:yyyyMMdd}.xlsx";
+
+      return File(excelFile, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+    }
   }
 }

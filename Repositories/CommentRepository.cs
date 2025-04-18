@@ -64,5 +64,11 @@ namespace SocialMedia.Repositories
       return await _context.Comments
         .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
     }
+    public async Task<int> CountCommentsByUserId(int userId, DateTime startDate, DateTime endDate)
+    {
+      return await _context.Comments
+        .Where(c => c.UserId == userId && c.CreatedAt >= startDate && c.CreatedAt <= endDate)
+        .CountAsync();
+    }
   }
 }

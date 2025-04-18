@@ -6,12 +6,17 @@ using System.Security.Cryptography;
 using SocialMedia.Models.Dto.Request;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
+using ClosedXML.Excel;
 
 namespace SocialMedia.Services
 {
   public class UserService : IUserService
   {
     private readonly IUserRepository _userRepository;
+    private readonly IPostRepository _postRepository;
+    private readonly ICommentRepository _commentRepository;
+    private readonly ILikeRepository _likeRepository;
+    private readonly IFriendRepository _friendRepository;
     private readonly IRoleRepository _roleRepository;
     private readonly RedisService _redisService;
     private readonly IJwtService _jwtService;
@@ -19,9 +24,14 @@ namespace SocialMedia.Services
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public UserService(IUserRepository userRepository, IRoleRepository roleRepository, RedisService redisService,
-                      IJwtService jwtService, IHttpContextAccessor httpContextAccessor, IImageService imageService)
+                      IJwtService jwtService, IHttpContextAccessor httpContextAccessor, IImageService imageService,
+                      IPostRepository postRepository, ICommentRepository commentRepository, ILikeRepository likeRepository, IFriendRepository friendRepository)
     {
       _userRepository = userRepository;
+      _commentRepository = commentRepository;
+      _likeRepository = likeRepository;
+      _postRepository = postRepository;
+      _friendRepository = friendRepository;
       _roleRepository = roleRepository;
       _redisService = redisService;
       _jwtService = jwtService;
@@ -42,7 +52,7 @@ namespace SocialMedia.Services
       //check request
       if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
       {
-        return new ApiResponse<string>(400, "Email hoặc password chỉ là khoẳng trắng", null);
+        return new ApiResponse<string>(400, "Email hoặc password chỉ là khoảng trắng", null);
       }
       //Check user already exists
       var user = await _userRepository.GetUserByEmailAsync(request.Email.ToLower());
@@ -54,7 +64,7 @@ namespace SocialMedia.Services
       var role = await _roleRepository.GetRoleByNameAsync("User");
       if (role == null)
       {
-        return new ApiResponse<string>(404, "Role User not found", null);
+        return new ApiResponse<string>(404, "Role User không tồn tại!", null);
       }
       //Create new user
       string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
@@ -320,75 +330,78 @@ namespace SocialMedia.Services
       });
     }
 
-    public async Task<List<UserReportResponse>> GetWeeklyUserReports()
+    public async Task<List<UserReportResponse>> ReportOfUser()
     {
-      var oneWeekAgo = DateTime.UtcNow.AddDays(-7);
       //check user
       var enail = GetCurrentUserEmail();
-      var user = await GetUserByEmailAsync(enail);
-      var posts = await _context.Posts
-          .Where(p => p.CreatedAt >= oneWeekAgo)
-          .ToListAsync();
-
-      var likes = await _context.Likes
-          .Where(l => l.CreatedAt >= oneWeekAgo)
-          .ToListAsync();
-
-      var comments = await _context.Comments
-          .Where(c => c.CreatedAt >= oneWeekAgo)
-          .ToListAsync();
-
-      var friends = await _context.Friends
-          .Where(f => f.CreatedAt >= oneWeekAgo)
-          .ToListAsync();
-
-      var reports = user.Select(u =>
+      if (string.IsNullOrEmpty(enail))
       {
-        var fullName = $"{u.FirstName} {u.LastName}";
-
-        var userPosts = posts.Count(p => p.UserId == u.Id);
-        var userLikes = likes.Count(l => l.UserId == u.Id);
-        var userComments = comments.Count(c => c.UserId == u.Id);
-        var userNewFriends = friends.Count(f => f.RequesterId == uId || f.ReceiverId == u.Id);
-
-        return new UserReportResponse
-        {
-          UserId = u.Id,
-          FullName = fullName,
-          TotalPosts = userPosts,
-          TotalLikes = userLikes,
-          TotalComments = userComments,
-          NewFriendsThisWeek = userNewFriends
-        };
-      }).ToList();
-
-      return reports;
+        return new List<UserReportResponse>();
+      }
+      var user = await GetUserByEmailAsync(enail);
+      if (user == null)
+      {
+        return new List<UserReportResponse>();
+      }
+      var users = await _userRepository.GetUserById(user.Id);
+      if (users == null)
+      {
+        return new List<UserReportResponse>();
+      }
+      //config Date and report
+      var startDate = DateTime.UtcNow.AddDays(-7);
+      var endDate = DateTime.UtcNow;
+      var report = new List<UserReportResponse>();
+      //export report
+      int postCount = await _postRepository.CountPostsByUserId(users.Id, startDate, endDate);
+      int commentCount = await _commentRepository.CountCommentsByUserId(users.Id, startDate, endDate);
+      int likeCount = await _likeRepository.CountLikeByUserId(users.Id, startDate, endDate);
+      int friendCount = await _friendRepository.CountFriendByUserId(users.Id, startDate, endDate);
+      //response
+      report.Add(new UserReportResponse 
+      {
+        Id = users.Id,
+        FullName = $"{users.FirstName} {users.LastName}",
+        Email = user.Email,
+        TotalPosts = postCount,
+        TotalComments = commentCount,
+        TotalLikes = likeCount,
+        NewFriends = friendCount
+      });
+      return report;
     }
     public byte[] ExportUserReportsToExcel(List<UserReportResponse> reports)
     {
+      var startDate = DateTime.UtcNow.AddDays(-7).ToString("dd/MM/yyyy");
+      var endDate = DateTime.UtcNow.ToString("dd/MM/yyyy");
       using var workbook = new XLWorkbook();
       var worksheet = workbook.Worksheets.Add("User Report");
-
-      worksheet.Cell(1, 1).Value = "User ID";
-      worksheet.Cell(1, 2).Value = "Full Name";
-      worksheet.Cell(1, 3).Value = "Full Name";
-      worksheet.Cell(1, 4).Value = "Posts";
-      worksheet.Cell(1, 5).Value = "Likes";
-      worksheet.Cell(1, 6).Value = "Comments";
-      worksheet.Cell(1, 7).Value = "New Friends";
+      //Title
+      worksheet.Cell(1, 1).Value = $"Báo cáo hoạt động của bạn từ ngày {startDate} đến ngày {endDate}";
+      worksheet.Range(1, 1, 1, 7).Merge();
+      worksheet.Cell(1, 1).Style.Font.Bold = true;
+      worksheet.Cell(1, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+      //Content
+      worksheet.Cell(2, 1).Value = "User ID";
+      worksheet.Cell(2, 2).Value = "Full Name";
+      worksheet.Cell(2, 3).Value = "Email";
+      worksheet.Cell(2, 4).Value = "Posts";
+      worksheet.Cell(2, 5).Value = "Likes";
+      worksheet.Cell(2, 6).Value = "Comments";
+      worksheet.Cell(2, 7).Value = "New Friends";
 
       for (int i = 0; i < reports.Count; i++)
       {
         var r = reports[i];
-        worksheet.Cell(i + 2, 1).Value = r.UserId;
-        worksheet.Cell(i + 2, 2).Value = r.FullName;
-        worksheet.Cell(i + 2, 3).Value = r.Email;
-        worksheet.Cell(i + 2, 4).Value = r.TotalPosts;
-        worksheet.Cell(i + 2, 5).Value = r.TotalLikes;
-        worksheet.Cell(i + 2, 6).Value = r.TotalComments;
-        worksheet.Cell(i + 2, 7).Value = r.NewFriendsThisWeek;
+        worksheet.Cell(i + 3, 1).Value = r.Id;
+        worksheet.Cell(i + 3, 2).Value = r.FullName;
+        worksheet.Cell(i + 3, 3).Value = r.Email;
+        worksheet.Cell(i + 3, 4).Value = r.TotalPosts;
+        worksheet.Cell(i + 3, 5).Value = r.TotalLikes;
+        worksheet.Cell(i + 3, 6).Value = r.TotalComments;
+        worksheet.Cell(i + 3, 7).Value = r.NewFriends;
       }
-
+      worksheet.Columns().AdjustToContents();
       using var stream = new MemoryStream();
       workbook.SaveAs(stream);
       return stream.ToArray();

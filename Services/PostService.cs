@@ -48,7 +48,7 @@ namespace SocialMedia.Services
         return new ApiResponse<PostResponse>(404, "Người dùng không tồn tại!", null);
       }
       var infoUser = await _userRepository.GetUserById(user.Id);
-      string author = $"{infoUser.FirstName} {infoUser.LastName}";
+      string author = $"{infoUser!.FirstName} {infoUser.LastName}";
       //check request
       if (string.IsNullOrWhiteSpace(request.Title) || string.IsNullOrWhiteSpace(request.Content))
       {
@@ -101,7 +101,7 @@ namespace SocialMedia.Services
         return new ApiResponse<PostResponse>(404, "Người dùng không tồn tại!", null);
       }
       var infoUser = await _userRepository.GetUserById(user.Id);
-      string author = $"{infoUser.FirstName} {infoUser.LastName}";
+      string author = $"{infoUser!.FirstName} {infoUser.LastName}";
       //check image
       string? imageUrl = null;
       if (request.ImageUrl != null)
@@ -176,7 +176,7 @@ namespace SocialMedia.Services
       //Get List Post By User
       var post = await _postRepository.GetPostsByUserId(user.Id);
       var infoUser = await _userRepository.GetUserById(user.Id);
-      string author = $"{infoUser.FirstName} {infoUser.LastName}";
+      string author = $"{infoUser!.FirstName} {infoUser.LastName}";
       var postResponses = post.Select(p => new PostResponse
       {
         Id = p.Id,

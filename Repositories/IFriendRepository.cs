@@ -10,5 +10,6 @@ namespace SocialMedia.Repositories
     Task<Friend?> UpdateFriend(Friend friend);
     Task<Friend?> DeleteFriend(int id);
     Task<List<Friend>> SearchFriendByKey(string keyword);
+    Task<int> CountFriendByUserId(int userId, DateTime startDate, DateTime endDate);
   }
 }

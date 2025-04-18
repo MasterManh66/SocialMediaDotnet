@@ -301,3 +301,11 @@ D:\Project\Net_Core\SocialMediaDotnet\obj\Debug\net8.0\staticwebassets.pack.json
 D:\Project\Net_Core\SocialMediaDotnet\obj\Debug\net8.0\SocialMe.B1ADF9F0.Up2Date
 D:\Project\Net_Core\SocialMediaDotnet\obj\Debug\net8.0\SocialMedia.genruntimeconfig.cache
 D:\Project\Net_Core\SocialMediaDotnet\obj\Debug\net8.0\ref\SocialMedia.dll
+C:\Users\trantienmanh\Project\SocialMediaNetCore\SocialMedia\bin\Debug\net8.0\ClosedXML.dll
+C:\Users\trantienmanh\Project\SocialMediaNetCore\SocialMedia\bin\Debug\net8.0\ClosedXML.Parser.dll
+C:\Users\trantienmanh\Project\SocialMediaNetCore\SocialMedia\bin\Debug\net8.0\DocumentFormat.OpenXml.dll
+C:\Users\trantienmanh\Project\SocialMediaNetCore\SocialMedia\bin\Debug\net8.0\DocumentFormat.OpenXml.Framework.dll
+C:\Users\trantienmanh\Project\SocialMediaNetCore\SocialMedia\bin\Debug\net8.0\ExcelNumberFormat.dll
+C:\Users\trantienmanh\Project\SocialMediaNetCore\SocialMedia\bin\Debug\net8.0\RBush.dll
+C:\Users\trantienmanh\Project\SocialMediaNetCore\SocialMedia\bin\Debug\net8.0\SixLabors.Fonts.dll
+C:\Users\trantienmanh\Project\SocialMediaNetCore\SocialMedia\bin\Debug\net8.0\System.IO.Packaging.dll

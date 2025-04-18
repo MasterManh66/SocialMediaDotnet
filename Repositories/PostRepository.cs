@@ -63,5 +63,11 @@ namespace SocialMedia.Repositories
         .Include(p => p.User)
         .ToListAsync();
     }
+    public async Task<int> CountPostsByUserId(int userId, DateTime startDate, DateTime endDate)
+    {
+      return await _context.Posts
+        .Where(p => p.UserId == userId && p.CreatedAt >=  startDate &&  p.CreatedAt <= endDate)
+        .CountAsync();
+    }
   }
 }

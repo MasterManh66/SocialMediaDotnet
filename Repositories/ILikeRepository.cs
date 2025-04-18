@@ -10,5 +10,6 @@ namespace SocialMedia.Repositories
     Task<Like?> GetLikeByUserIdAndPostId(int userId, int postId);
     Task<Like?> CreateLike(Like like);
     Task<Like?> DeleteLike(int id);
+    Task<int> CountLikeByUserId(int userId, DateTime startDate, DateTime endDate);
   }
 }

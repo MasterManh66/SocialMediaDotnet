@@ -12,5 +12,6 @@ namespace SocialMedia.Repositories
     Task<Comment?> DeleteComment(int id);
     Task<Comment?> UpdateComment(Comment comment);
     Task<Comment?> GetCommentByIdAndUserId(int id, int userId);
+    Task<int> CountCommentsByUserId(int userId, DateTime startDate, DateTime endDate);
   }
 }

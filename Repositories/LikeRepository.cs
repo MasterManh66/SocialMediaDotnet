@@ -53,5 +53,11 @@ namespace SocialMedia.Repositories
       }
       return like;
     }
+    public async Task<int> CountLikeByUserId(int userId, DateTime startDate, DateTime endDate)
+    {
+      return await _context.Likes
+        .Where(l => l.UserId == userId && l.CreatedAt >= startDate && l.CreatedAt <= endDate)
+        .CountAsync();
+    }
   }
 }

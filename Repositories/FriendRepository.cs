@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SocialMedia.Data;
 using SocialMedia.Models.Entities;
+using SocialMedia.Models.Enums;
 
 namespace SocialMedia.Repositories
 {
@@ -55,6 +56,13 @@ namespace SocialMedia.Repositories
           EF.Functions.Like((f.Requester != null ? f.Requester.FirstName + " " + f.Requester.LastName : ""), $"%{keyword}%") ||
           EF.Functions.Like((f.Receiver != null ? f.Receiver.FirstName + " " + f.Receiver.LastName : ""), $"%{keyword}%"))
         .ToListAsync();
+    }
+    public async Task<int> CountFriendByUserId(int userId, DateTime startDate, DateTime endDate)
+    {
+      return await _context.Friends
+        .Where(f => (f.RequesterId == userId || f.ReceiverId == userId) && f.FriendStatus == FriendEnum.Accepted
+               && f.CreatedAt >= startDate && f.CreatedAt <= endDate)
+        .CountAsync();
     }
   }
 }

@@ -11,5 +11,6 @@ namespace SocialMedia.Repositories
     Task<Post?> UpdatePost(Post post);
     Task<Post?> DeletePost(int id);
     Task<List<Post>> SearchPostByKey(string Keyword);
+    Task<int> CountPostsByUserId(int userId, DateTime startDate,  DateTime endDate);
   }
 }
