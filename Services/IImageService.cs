@@ -1,5 +1,4 @@
-﻿using SocialMedia.Models.Dto.Request;
-using SocialMedia.Models.Dto.Response;
+﻿using SocialMedia.Models.Dto;
 
 namespace SocialMedia.Services
 {

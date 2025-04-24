@@ -1,7 +1,7 @@
 ﻿using Azure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SocialMedia.Models.Dto.Request;
+using SocialMedia.Models.Dto.Like;
 using SocialMedia.Models.Dto.Response;
 using SocialMedia.Services;
 
@@ -18,7 +18,7 @@ namespace SocialMedia.Controllers
     }
     [Authorize]
     [HttpPost("LikePost")]
-    public async Task<IActionResult> LikePost([FromQuery] LikeRequest request)
+    public async Task<IActionResult> LikePost([FromQuery] AddLikeRequestDto request)
     {
       if (!ModelState.IsValid)
       {
@@ -44,7 +44,7 @@ namespace SocialMedia.Controllers
     }
     [Authorize]
     [HttpDelete("UnlikePost")]
-    public async Task<IActionResult> UnlikePost([FromQuery] LikeRequest request)
+    public async Task<IActionResult> UnlikePost([FromQuery] AddLikeRequestDto request)
     {
       if (!ModelState.IsValid)
       {

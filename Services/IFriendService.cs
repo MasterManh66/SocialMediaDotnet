@@ -1,15 +1,16 @@
-﻿using SocialMedia.Models.Dto.Response;
+﻿using SocialMedia.Models.Dto;
+using SocialMedia.Models.Dto.Friend;
 
 namespace SocialMedia.Services
 {
   public interface IFriendService
   {
-    Task<ApiResponse<FriendResponse>> SendFriendRequest(int ReceiverId);
-    Task<ApiResponse<List<FriendResponse>>> GetFriendsRequest();
-    Task<ApiResponse<List<FriendResponse>>> GetFriendsReceiver();
-    Task<ApiResponse<FriendResponse>> AcceptedFriend(int RequestId);
-    Task<ApiResponse<List<FriendResponse>>> FriendOfUser();
+    Task<ApiResponse<FriendDto>> SendFriendRequest(int ReceiverId);
+    Task<ApiResponse<List<FriendDto>>> GetFriendsRequest();
+    Task<ApiResponse<List<FriendDto>>> GetFriendsReceiver();
+    Task<ApiResponse<FriendDto>> AcceptedFriend(int RequestId);
+    Task<ApiResponse<List<FriendDto>>> FriendOfUser();
     Task<ApiResponse<string>> DeleteFriend(int FriendId);
-    Task<ApiResponse<List<FriendResponse>>> SearchFriend(string UserName);
+    Task<ApiResponse<List<FriendDto>>> SearchFriend(string UserName);
   }
 }

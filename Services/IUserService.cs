@@ -1,19 +1,19 @@
-﻿using SocialMedia.Models.Dto.Request;
-using SocialMedia.Models.Dto.Response;
+﻿using SocialMedia.Models.Dto;
+using SocialMedia.Models.Dto.User;
 
 namespace SocialMedia.Services
 {
   public interface IUserService
   {
-    Task<ApiResponse<string>> RegisterUser(RegisterUserRequest request);
-    Task<ApiResponse<LoginResponse>> LoginUser(LoginUserRequest request);
-    Task<ApiResponse<AuthResponse>> VerifyOtp(AuthRequest request);
-    Task<ApiResponse<ForgetPasswordResponse>> ForgetPassword(ForgetPasswordRequest request);
-    Task<ApiResponse<VerifyForgetPasswordResponse>> VerifyForgetPasword(VerifyForgetPasswordRequest request);
-    Task<ApiResponse<string>> ChangePassword(ChangePasswordRequest request);
-    Task<ApiResponse<UserResponse>> GetUser();
-    Task<ApiResponse<UserResponse>> UpdateUser(UserRequest request);
-    Task<List<UserReportResponse>> ReportOfUser();
-    byte[] ExportUserReportsToExcel(List<UserReportResponse> reports);
+    Task<ApiResponse<string>> RegisterUser(RegisterUserRequestDto request);
+    Task<ApiResponse<LoginUserResponseDto>> LoginUser(LoginUserRequestDto request);
+    Task<ApiResponse<AuthUserResponseDto>> VerifyOtp(AuthUserRequestDto request);
+    Task<ApiResponse<ForgetPasswordResponseDto>> ForgetPassword(ForgetPasswordRequestDto request);
+    Task<ApiResponse<VerifyForgetPasswordResponseDto>> VerifyForgetPasword(VerifyForgetPasswordRequestDto request);
+    Task<ApiResponse<string>> ChangePassword(ChangePasswordRequestDto request);
+    Task<ApiResponse<UpdateUserResponseDto>> GetUser();
+    Task<ApiResponse<UpdateUserResponseDto>> UpdateUser(UpdateUserRequestDto request);
+    Task<List<UserReportResponseDto>> ReportOfUser();
+    byte[] ExportUserReportsToExcel(List<UserReportResponseDto> reports);
   }
 }

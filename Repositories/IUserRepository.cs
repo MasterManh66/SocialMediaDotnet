@@ -2,12 +2,10 @@
 
 namespace SocialMedia.Repositories
 {
-  public interface IUserRepository
+  public interface IUserRepository : IGenericRepository<User>
   {
     Task<User?> GetUserById(int userId);
     Task<User?> GetUserByEmailAsync(string email);
-    Task<User?> AddUserAsync(User user);
-    Task<User?> UpdateAsync(User user);
     Task<User?> GetByEmailAsync(string email);
   }
 }

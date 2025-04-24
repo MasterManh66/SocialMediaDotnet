@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SocialMedia.Models.Dto.Request;
+using SocialMedia.Models.Dto.Post;
 using SocialMedia.Services;
 
 namespace SocialMedia.Controllers
@@ -16,7 +16,7 @@ namespace SocialMedia.Controllers
     }
     [Authorize]
     [HttpPost("CreatPost")]
-    public async Task<IActionResult> CreatePost([FromForm] PostCreateRequest request)
+    public async Task<IActionResult> CreatePost([FromForm] AddPostRequestDto request)
     {
       if (!ModelState.IsValid)
       {
@@ -31,7 +31,7 @@ namespace SocialMedia.Controllers
     }
     [Authorize]
     [HttpPut("UpdatePost")]
-    public async Task<IActionResult> UpdatePost([FromForm] PostEditRequest request)
+    public async Task<IActionResult> UpdatePost([FromForm] UpdatePostRequestDto request)
     {
       if (!ModelState.IsValid)
       {

@@ -1,15 +1,15 @@
-﻿using SocialMedia.Models.Dto.Request;
-using SocialMedia.Models.Dto.Response;
+﻿using SocialMedia.Models.Dto;
+using SocialMedia.Models.Dto.Post;
 
 namespace SocialMedia.Services
 {
   public interface IPostService
   {
-    Task<ApiResponse<PostResponse>> CreatePost(PostCreateRequest request);
-    Task<ApiResponse<PostResponse>> UpdatePost(PostEditRequest request);
-    Task<ApiResponse<List<PostResponse>>> GetPost();
+    Task<ApiResponse<PostDto>> CreatePost(AddPostRequestDto request);
+    Task<ApiResponse<PostDto>> UpdatePost(UpdatePostRequestDto request);
+    Task<ApiResponse<List<PostDto>>> GetPost();
     Task<ApiResponse<string>> DeletePost(int postId);
-    Task<ApiResponse<List<PostResponse>>> SearchPost(string keyWord);
-    Task<ApiResponse<List<PostResponse>>> GetTimeLine();
+    Task<ApiResponse<List<PostDto>>> SearchPost(string keyWord);
+    Task<ApiResponse<List<PostDto>>> GetTimeLine();
   }
 }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SocialMedia.Models.Dto.Request;
+using SocialMedia.Models.Dto.Comment;
 using SocialMedia.Services;
 
 namespace SocialMedia.Controllers
@@ -16,7 +16,7 @@ namespace SocialMedia.Controllers
     }
     [Authorize]
     [HttpPost("CommentPost")]
-    public async Task<IActionResult> CommentPost([FromForm] CommentRequest request)
+    public async Task<IActionResult> CommentPost([FromForm] AddCommentRequestDto request)
     {
       var response = await _commentService.CommentPost(request);
       if (response.Status != 201)
@@ -38,7 +38,7 @@ namespace SocialMedia.Controllers
     }
     [Authorize]
     [HttpPut("EditComment")]
-    public async Task<IActionResult> EditComment([FromForm] CommentEditRequest request)
+    public async Task<IActionResult> EditComment([FromForm] UpdateCommentRequestDto request)
     {
       var response = await _commentService.EditComment(request);
       if (response.Status != 200)

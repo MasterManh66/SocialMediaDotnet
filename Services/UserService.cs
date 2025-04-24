@@ -1,12 +1,12 @@
-﻿using SocialMedia.Models.Dto.Response;
-using SocialMedia.Models.Entities;
+﻿using SocialMedia.Models.Entities;
 using SocialMedia.Repositories;
 using BCrypt.Net;
 using System.Security.Cryptography;
-using SocialMedia.Models.Dto.Request;
+using SocialMedia.Models.Dto;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using ClosedXML.Excel;
+using SocialMedia.Models.Dto.User;
 
 namespace SocialMedia.Services
 {
@@ -47,7 +47,7 @@ namespace SocialMedia.Services
       return _userRepository.GetByEmailAsync(email);
     }
 
-    public async Task<ApiResponse<string>> RegisterUser(RegisterUserRequest request)
+    public async Task<ApiResponse<string>> RegisterUser(RegisterUserRequestDto request)
     {
       //check request
       if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
@@ -81,114 +81,114 @@ namespace SocialMedia.Services
          }
       };
       //Add user to database
-      await _userRepository.AddUserAsync(newUser);
+      await _userRepository.AddAsync(newUser);
 
       return new ApiResponse<string>(201, "Bạn đã tạo tài khoản mới thành công!", newUser.Email);
     }
 
-    public async Task<ApiResponse<LoginResponse>> LoginUser(LoginUserRequest request)
+    public async Task<ApiResponse<LoginUserResponseDto>> LoginUser(LoginUserRequestDto request)
     {
       //check request
       if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
       {
-        return new ApiResponse<LoginResponse>(400, "Email hoặc password đang là khoảng trống", null);
+        return new ApiResponse<LoginUserResponseDto>(400, "Email hoặc password đang là khoảng trống", null);
       }
       //check user exists
       var user = await _userRepository.GetUserByEmailAsync(request.Email.ToLower());
       if (user == null)
       {
-        return new ApiResponse<LoginResponse>(404, "Người dùng không tồn tại", null);
+        return new ApiResponse<LoginUserResponseDto>(404, "Người dùng không tồn tại", null);
       }
       //check password
       bool isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.Password);
       if (!isPasswordValid)
       {
-        return new ApiResponse<LoginResponse>(400, "Bạn đã nhập sai Password!", null);
+        return new ApiResponse<LoginUserResponseDto>(400, "Bạn đã nhập sai Password!", null);
       }
       //create otp
       int otp = RandomNumberGenerator.GetInt32(100000, 1000000);
       await _redisService.SetValueAsync($"otp:{user.Email.ToLower()}", otp.ToString(), TimeSpan.FromMinutes(5));
-      return new ApiResponse<LoginResponse>(200, "Đăng nhập thành công, vui lòng xác thực Otp", new LoginResponse
+      return new ApiResponse<LoginUserResponseDto>(200, "Đăng nhập thành công, vui lòng xác thực Otp", new LoginUserResponseDto
       {
         Otp = otp.ToString()
       });
     }
 
-    public async Task<ApiResponse<AuthResponse>> VerifyOtp(AuthRequest request)
+    public async Task<ApiResponse<AuthUserResponseDto>> VerifyOtp(AuthUserRequestDto request)
     {
       //check request
       if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Otp))
       {
-        return new ApiResponse<AuthResponse>(400, "Otp hoặc Email chỉ là khoảng trắng", null);
+        return new ApiResponse<AuthUserResponseDto>(400, "Otp hoặc Email chỉ là khoảng trắng", null);
       }
       //check otp & email exists
       var user = await _userRepository.GetUserByEmailAsync(request.Email.ToLower());
       if (user == null)
       {
-        return new ApiResponse<AuthResponse>(404, "User không tồn tại", null);
+        return new ApiResponse<AuthUserResponseDto>(404, "User không tồn tại", null);
       }
       var otp = await _redisService.GetValueAsync($"otp:{request.Email.ToLower()}");
       if ( request.Otp != otp )
       {
-        return new ApiResponse<AuthResponse>(404, "Otp nhập không đúng!", null);
+        return new ApiResponse<AuthUserResponseDto>(404, "Otp nhập không đúng!", null);
       }
       //Create token
       var token = _jwtService.GenerateToken(user.Id, user.Email);
-      return new ApiResponse<AuthResponse>(200, "Xác thực Otp thành công!", new AuthResponse
+      return new ApiResponse<AuthUserResponseDto>(200, "Xác thực Otp thành công!", new AuthUserResponseDto
       {
         Token = token
       });
     }
 
-    public async Task<ApiResponse<ForgetPasswordResponse>> ForgetPassword(ForgetPasswordRequest request)
+    public async Task<ApiResponse<ForgetPasswordResponseDto>> ForgetPassword(ForgetPasswordRequestDto request)
     {
       //check request
       if (string.IsNullOrWhiteSpace(request.Email))
       {
-        return new ApiResponse<ForgetPasswordResponse>(400, "Email hoặc đang là khoảng trống", null);
+        return new ApiResponse<ForgetPasswordResponseDto>(400, "Email hoặc đang là khoảng trống", null);
       }
       //check user exists
       var user = await _userRepository.GetUserByEmailAsync(request.Email.ToLower());
       if (user == null)
       {
-        return new ApiResponse<ForgetPasswordResponse>(404, "Người dùng không tồn tại", null);
+        return new ApiResponse<ForgetPasswordResponseDto>(404, "Người dùng không tồn tại", null);
       }
       //create otp
       int otp = RandomNumberGenerator.GetInt32(100000, 1000000);
       await _redisService.SetValueAsync($"otp:{user.Email.ToLower()}", otp.ToString(), TimeSpan.FromMinutes(5));
-      return new ApiResponse<ForgetPasswordResponse>(200, "Quên mật khẩu thành công, Vui lòng xác thực mã OTP để đổi mật khẩu mới!", new ForgetPasswordResponse
+      return new ApiResponse<ForgetPasswordResponseDto>(200, "Quên mật khẩu thành công, Vui lòng xác thực mã OTP để đổi mật khẩu mới!", new ForgetPasswordResponseDto
       {
         Otp = otp.ToString()
       });
     }
 
-    public async Task<ApiResponse<VerifyForgetPasswordResponse>> VerifyForgetPasword(VerifyForgetPasswordRequest request)
+    public async Task<ApiResponse<VerifyForgetPasswordResponseDto>> VerifyForgetPasword(VerifyForgetPasswordRequestDto request)
     {
       //check request
       if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Otp))
       {
-        return new ApiResponse<VerifyForgetPasswordResponse>(400, "Email & Otp đang là khoảng trống", null);
+        return new ApiResponse<VerifyForgetPasswordResponseDto>(400, "Email & Otp đang là khoảng trống", null);
       }
       //check email & otp exists
       var user = await _userRepository.GetUserByEmailAsync(request.Email.ToLower());
       if (user == null)
       {
-        return new ApiResponse<VerifyForgetPasswordResponse>(404, "Người dùng không tồn tại", null);
+        return new ApiResponse<VerifyForgetPasswordResponseDto>(404, "Người dùng không tồn tại", null);
       }
       var otp = await _redisService.GetValueAsync($"otp:{request.Email.ToLower()}");
       if (request.Otp != otp)
       {
-        return new ApiResponse<VerifyForgetPasswordResponse>(404, "Otp không đúng!", null);
+        return new ApiResponse<VerifyForgetPasswordResponseDto>(404, "Otp không đúng!", null);
       }
       string token = _jwtService.GenerateToken(user.Id, user.Email);
-      return new ApiResponse<VerifyForgetPasswordResponse>(200, "Xác thực Otp quên mật khẩu thành công, vui lòng thay đổi mật khẩu mới!", new VerifyForgetPasswordResponse
+      return new ApiResponse<VerifyForgetPasswordResponseDto>(200, "Xác thực Otp quên mật khẩu thành công, vui lòng thay đổi mật khẩu mới!", new VerifyForgetPasswordResponseDto
       {
         Link =$"https://localhost:5082/User/ChangePassword?token={token}",
         Token = token
       });
     }
 
-    public async Task<ApiResponse<string>> ChangePassword(ChangePasswordRequest request)
+    public async Task<ApiResponse<string>> ChangePassword(ChangePasswordRequestDto request)
     {
       //check request
       if (string.IsNullOrWhiteSpace(request.NewPassword) || string.IsNullOrWhiteSpace(request.ConfirmPassword))
@@ -218,21 +218,21 @@ namespace SocialMedia.Services
       return new ApiResponse<string>(200, "Mật khẩu đã được thay đổi thành công", null);
     }
 
-    public async Task<ApiResponse<UserResponse>> GetUser()
+    public async Task<ApiResponse<UpdateUserResponseDto>> GetUser()
     {
       //check token
       var email = GetCurrentUserEmail();
       if (string.IsNullOrEmpty(email))
       {
-        return new ApiResponse<UserResponse>(401, "Không thể xác thực người dùng!", null);
+        return new ApiResponse<UpdateUserResponseDto>(401, "Không thể xác thực người dùng!", null);
       }
       //get user by email
       var user = await GetUserByEmailAsync(email);
       if (user == null)
       {
-        return new ApiResponse<UserResponse>(404, "Người dùng không tồn tại!", null);
+        return new ApiResponse<UpdateUserResponseDto>(404, "Người dùng không tồn tại!", null);
       }
-      return new ApiResponse<UserResponse>(200, "Lấy thành công thông tin của bạn", new UserResponse
+      return new ApiResponse<UpdateUserResponseDto>(200, "Lấy thành công thông tin của bạn", new UpdateUserResponseDto
       {
         Id = user.Id,
         FirstName = user.FirstName,
@@ -247,7 +247,7 @@ namespace SocialMedia.Services
       });
     }
 
-    public async Task<ApiResponse<UserResponse>> UpdateUser(UserRequest request)
+    public async Task<ApiResponse<UpdateUserResponseDto>> UpdateUser(UpdateUserRequestDto request)
     {
       //check image
       string? imageUrl = null;
@@ -256,7 +256,7 @@ namespace SocialMedia.Services
         var uploadResult = await _imageService.UploadImage(new UploadImageRequest { Image = request.ImageUrl });
         if (uploadResult.Status != 201)
         {
-          return new ApiResponse<UserResponse>(400, "Tải ảnh lên thất bại!", null);
+          return new ApiResponse<UpdateUserResponseDto>(400, "Tải ảnh lên thất bại!", null);
         }
         imageUrl = uploadResult.Data;
       }
@@ -264,12 +264,12 @@ namespace SocialMedia.Services
       var enail = GetCurrentUserEmail();
       if (string.IsNullOrEmpty(enail))
       {
-        return new ApiResponse<UserResponse>(401, "Không thể xác thực người dùng!", null);
+        return new ApiResponse<UpdateUserResponseDto>(401, "Không thể xác thực người dùng!", null);
       }
       var user = await GetUserByEmailAsync(enail);
       if (user == null)
       {
-        return new ApiResponse<UserResponse>(404, "Người dùng không tồn tại!", null);
+        return new ApiResponse<UpdateUserResponseDto>(404, "Người dùng không tồn tại!", null);
       }
       //update user
       bool isUpdated = false;
@@ -310,12 +310,12 @@ namespace SocialMedia.Services
       }
       if (!isUpdated)
       {
-        return new ApiResponse<UserResponse>(400, "Không có thông tin nào để cập nhật!", null);
+        return new ApiResponse<UpdateUserResponseDto>(400, "Không có thông tin nào để cập nhật!", null);
       } else
       {
         await _userRepository.UpdateAsync(user);
       }
-      return new ApiResponse<UserResponse>(200, "Cập nhật thành công thông tin của bạn!", new UserResponse
+      return new ApiResponse<UpdateUserResponseDto>(200, "Cập nhật thành công thông tin của bạn!", new UpdateUserResponseDto
       {
         Id = user.Id,
         FirstName = user.FirstName,
@@ -330,35 +330,35 @@ namespace SocialMedia.Services
       });
     }
 
-    public async Task<List<UserReportResponse>> ReportOfUser()
+    public async Task<List<UserReportResponseDto>> ReportOfUser()
     {
       //check user
       var enail = GetCurrentUserEmail();
       if (string.IsNullOrEmpty(enail))
       {
-        return new List<UserReportResponse>();
+        return new List<UserReportResponseDto>();
       }
       var user = await GetUserByEmailAsync(enail);
       if (user == null)
       {
-        return new List<UserReportResponse>();
+        return new List<UserReportResponseDto>();
       }
       var users = await _userRepository.GetUserById(user.Id);
       if (users == null)
       {
-        return new List<UserReportResponse>();
+        return new List<UserReportResponseDto>();
       }
       //config Date and report
       var startDate = DateTime.UtcNow.AddDays(-7);
       var endDate = DateTime.UtcNow;
-      var report = new List<UserReportResponse>();
+      var report = new List<UserReportResponseDto>();
       //export report
       int postCount = await _postRepository.CountPostsByUserId(users.Id, startDate, endDate);
       int commentCount = await _commentRepository.CountCommentsByUserId(users.Id, startDate, endDate);
       int likeCount = await _likeRepository.CountLikeByUserId(users.Id, startDate, endDate);
       int friendCount = await _friendRepository.CountFriendByUserId(users.Id, startDate, endDate);
       //response
-      report.Add(new UserReportResponse 
+      report.Add(new UserReportResponseDto 
       {
         Id = users.Id,
         FullName = $"{users.FirstName} {users.LastName}",
@@ -370,7 +370,7 @@ namespace SocialMedia.Services
       });
       return report;
     }
-    public byte[] ExportUserReportsToExcel(List<UserReportResponse> reports)
+    public byte[] ExportUserReportsToExcel(List<UserReportResponseDto> reports)
     {
       var startDate = DateTime.UtcNow.AddDays(-7).ToString("dd/MM/yyyy");
       var endDate = DateTime.UtcNow.ToString("dd/MM/yyyy");

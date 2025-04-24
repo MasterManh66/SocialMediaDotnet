@@ -27,12 +27,13 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-builder.Services.AddScoped<IPostRepository, PostRepository>();
-builder.Services.AddScoped<ILikeRepository, LikeRepository>();
-builder.Services.AddScoped<ICommentRepository, CommentRepository>();
-builder.Services.AddScoped<IFriendRepository, FriendRepository>();
+builder.Services.AddScoped<IUserRepository, SqlUserRepository>();
+builder.Services.AddScoped<IRoleRepository, SqlRoleRepository>();
+builder.Services.AddScoped<IPostRepository, SqlPostRepository>();
+builder.Services.AddScoped<ILikeRepository, SqlLikeRepository>();
+builder.Services.AddScoped<ICommentRepository, SqlCommentRepository>();
+builder.Services.AddScoped<IFriendRepository, SqlFriendRepository>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(SqlGenericRepository<>));
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IJwtService, JwtService>();

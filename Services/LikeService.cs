@@ -1,8 +1,8 @@
 ﻿using SocialMedia.Models.Entities;
 using System.Security.Claims;
 using SocialMedia.Repositories;
-using SocialMedia.Models.Dto.Request;
-using SocialMedia.Models.Dto.Response;
+using SocialMedia.Models.Dto.Like;
+using SocialMedia.Models.Dto;
 
 namespace SocialMedia.Services
 {
@@ -32,32 +32,32 @@ namespace SocialMedia.Services
     {
       return _postRepository.GetPostById(postId);
     }
-    public async Task<ApiResponse<LikeResponse>> LikePost(LikeRequest request)
+    public async Task<ApiResponse<LikeDto>> LikePost(AddLikeRequestDto request)
     {
       //check user
       var email = GetCurrentUserEmail();
       if (string.IsNullOrEmpty(email))
       {
-        return new ApiResponse<LikeResponse>(401, "Không thể xác thực người dùng!", null);
+        return new ApiResponse<LikeDto>(401, "Không thể xác thực người dùng!", null);
       }
       var user = await GetUserByEmailAsync(email);
       if (user == null)
       {
-        return new ApiResponse<LikeResponse>(404, "Người dùng không tồn tại!", null);
+        return new ApiResponse<LikeDto>(404, "Người dùng không tồn tại!", null);
       }
       //check request
       if (request.PostId <= 0)
       {
-        return new ApiResponse<LikeResponse>(400, "ID bài viết không hợp lệ!", null);
+        return new ApiResponse<LikeDto>(400, "ID bài viết không hợp lệ!", null);
       }
       if (request.PostId == 0)
       {
-        return new ApiResponse<LikeResponse>(400, "ID bài viết không được để trống!", null);
+        return new ApiResponse<LikeDto>(400, "ID bài viết không được để trống!", null);
       }
       var post = await GetPostById(request.PostId);
       if (post == null || request.PostId != post.Id)
       {
-        return new ApiResponse<LikeResponse>(400, $"Bài viết {request.PostId} không tồn tại!", null);
+        return new ApiResponse<LikeDto>(400, $"Bài viết {request.PostId} không tồn tại!", null);
       }
       var author = post.User != null ? $"{post.User.FirstName} {post.User.LastName}" : "Anonymous";
       //create like
@@ -68,7 +68,7 @@ namespace SocialMedia.Services
       };
       //add database
       var like = await _likeRepository.CreateLike(newLike);
-      return new ApiResponse<LikeResponse>(201, $"Bạn đã thích bài viết {request.PostId} của tác giả {author} thành công!", new LikeResponse
+      return new ApiResponse<LikeDto>(201, $"Bạn đã thích bài viết {request.PostId} của tác giả {author} thành công!", new LikeDto
       {
         Id = newLike.Id,
         PostId = newLike.PostId,
@@ -78,26 +78,26 @@ namespace SocialMedia.Services
         CreatedAt = newLike.CreatedAt
       });
     }
-    public async Task<ApiResponse<List<LikeResponse>>> LikeOfUser()
+    public async Task<ApiResponse<List<LikeDto>>> LikeOfUser()
     {
       //check user
       var email = GetCurrentUserEmail();
       if (string.IsNullOrEmpty(email))
       {
-        return new ApiResponse<List<LikeResponse>> (401, "Không thể xác thực người dùng!", null);
+        return new ApiResponse<List<LikeDto>> (401, "Không thể xác thực người dùng!", null);
       }
       var user = await GetUserByEmailAsync(email);
       if (user == null)
       {
-        return new ApiResponse<List<LikeResponse>> (404, "Người dùng không tồn tại!", null);
+        return new ApiResponse<List<LikeDto>> (404, "Người dùng không tồn tại!", null);
       }
       //get like of user
       var likes = await _likeRepository.GetLikesByUserId(user.Id);
       if (likes == null || likes.Count == 0)
       {
-        return new ApiResponse<List<LikeResponse>>(404, "Bạn chưa thích bài viết nào!", null);
+        return new ApiResponse<List<LikeDto>>(404, "Bạn chưa thích bài viết nào!", null);
       }
-      var likeResponses = likes.Select(l => new LikeResponse
+      var likeResponses = likes.Select(l => new LikeDto
       {
         Id = l.Id,
         PostId = l.PostId,
@@ -105,9 +105,9 @@ namespace SocialMedia.Services
         UserId = l.UserId,
         CreatedAt = l.CreatedAt
       }).ToList();
-      return new ApiResponse<List<LikeResponse>>(200, "Danh sách bài viết đã thích của bạn", likeResponses);
+      return new ApiResponse<List<LikeDto>>(200, "Danh sách bài viết đã thích của bạn", likeResponses);
     }
-    public async Task<ApiResponse<string>> UnlikePost(LikeRequest request)
+    public async Task<ApiResponse<string>> UnlikePost(AddLikeRequestDto request)
     {
       //check user
       var email = GetCurrentUserEmail();

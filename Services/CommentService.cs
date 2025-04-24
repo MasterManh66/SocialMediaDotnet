@@ -2,7 +2,8 @@
 using System.Security.Claims;
 using SocialMedia.Repositories;
 using SocialMedia.Models.Dto.Request;
-using SocialMedia.Models.Dto.Response;
+using SocialMedia.Models.Dto.Comment;
+using SocialMedia.Models.Dto;
 
 namespace SocialMedia.Services
 {
@@ -32,32 +33,32 @@ namespace SocialMedia.Services
     {
       return _userRepository.GetByEmailAsync(email);
     }
-    public async Task<ApiResponse<CommentResponse>> CommentPost(CommentRequest request)
+    public async Task<ApiResponse<CommentDto>> CommentPost(AddCommentRequestDto request)
     {
       //check user
       var email = GetCurrentUserEmail();
       if (string.IsNullOrEmpty(email))
       {
-        return new ApiResponse<CommentResponse>(401, "Không thể xác thực người dùng!", null);
+        return new ApiResponse<CommentDto>(401, "Không thể xác thực người dùng!", null);
       }
       var user = await GetUserByEmailAsync(email);
       if (user == null)
       {
-        return new ApiResponse<CommentResponse>(404, "Người dùng không tồn tại!", null);
+        return new ApiResponse<CommentDto>(404, "Người dùng không tồn tại!", null);
       }
       //check request
       if (request.PostId <= 0 || request.PostId == 0)
       {
-        return new ApiResponse<CommentResponse>(400, "ID bài viết không hợp lệ!", null);
+        return new ApiResponse<CommentDto>(400, "ID bài viết không hợp lệ!", null);
       }
       if (string.IsNullOrEmpty(request.Content))
       {
-        return new ApiResponse<CommentResponse>(400, "Nội dung không được để trống!", null);
+        return new ApiResponse<CommentDto>(400, "Nội dung không được để trống!", null);
       }
       var post = await _postRepository.GetPostById(request.PostId);
       if (post == null || request.PostId != post.Id)
       {
-        return new ApiResponse<CommentResponse>(404, "Bài viết không tồn tại!", null);
+        return new ApiResponse<CommentDto>(404, "Bài viết không tồn tại!", null);
       }
       var author = post.User != null ? $"{post.User.FirstName} {post.User.LastName}" : "Anonymous";
       //check image
@@ -67,7 +68,7 @@ namespace SocialMedia.Services
         var uploadResult = await _imageService.UploadImage(new UploadImageRequest { Image = request.ImageUrl });
         if (uploadResult.Status != 201)
         {
-          return new ApiResponse<CommentResponse>(400, "Tải ảnh lên thất bại!", null);
+          return new ApiResponse<CommentDto>(400, "Tải ảnh lên thất bại!", null);
         }
         imageUrl = uploadResult.Data;
       }
@@ -81,7 +82,7 @@ namespace SocialMedia.Services
       };
       //add database
       await _commentRepository.CreateComment(newComment);
-      return new ApiResponse<CommentResponse>(201, $"Bạn đã bình luận bài viết {post.Id} thành công!", new CommentResponse
+      return new ApiResponse<CommentDto>(201, $"Bạn đã bình luận bài viết {post.Id} thành công!", new CommentDto
       {
         Id = newComment.Id,
         Content = newComment.Content,
@@ -91,27 +92,27 @@ namespace SocialMedia.Services
         UserId = user.Id
       });
     }
-    public async Task<ApiResponse<List<CommentResponse>>> CommentsOfUser()
+    public async Task<ApiResponse<List<CommentDto>>> CommentsOfUser()
     {
       //check user
       var email = GetCurrentUserEmail();
       if (string.IsNullOrEmpty(email))
       {
-        return new ApiResponse<List<CommentResponse>>(401, "Không thể xác thực người dùng!", null);
+        return new ApiResponse<List<CommentDto>>(401, "Không thể xác thực người dùng!", null);
       }
       var user = await GetUserByEmailAsync(email);
       if (user == null)
       {
-        return new ApiResponse<List<CommentResponse>>(404, "Người dùng không tồn tại!", null);
+        return new ApiResponse<List<CommentDto>>(404, "Người dùng không tồn tại!", null);
       }
       //get comment
       var comments = await _commentRepository.GetCommentsByUserId(user.Id);
       if (comments == null || comments.Count == 0)
       {
-        return new ApiResponse<List<CommentResponse>>(404, "Người dùng chưa bình luận bài viết nào!", null);
+        return new ApiResponse<List<CommentDto>>(404, "Người dùng chưa bình luận bài viết nào!", null);
       }
       //get comment
-      var commentResponses = comments.Select(c => new CommentResponse
+      var commentResponses = comments.Select(c => new CommentDto
       {
         Id = c.Id,
         Content = c.Content,
@@ -119,26 +120,26 @@ namespace SocialMedia.Services
         PostId = c.PostId,
         UserId = c.UserId
       }).ToList();
-      return new ApiResponse<List<CommentResponse>>(200, "Lấy danh sách bình luận thành công!", commentResponses);
+      return new ApiResponse<List<CommentDto>>(200, "Lấy danh sách bình luận thành công!", commentResponses);
     }
-    public async Task<ApiResponse<CommentResponse>> EditComment(CommentEditRequest request)
+    public async Task<ApiResponse<CommentDto>> EditComment(UpdateCommentRequestDto request)
     {
       //check user
       var email = GetCurrentUserEmail();
       if (string.IsNullOrEmpty(email))
       {
-        return new ApiResponse<CommentResponse>(401, "Không thể xác thực người dùng!", null);
+        return new ApiResponse<CommentDto>(401, "Không thể xác thực người dùng!", null);
       }
       var user = await GetUserByEmailAsync(email);
       if (user == null)
       {
-        return new ApiResponse<CommentResponse>(404, "Người dùng không tồn tại!", null);
+        return new ApiResponse<CommentDto>(404, "Người dùng không tồn tại!", null);
       }
       //check comment
       var comment = await _commentRepository.GetCommentById(request.Id);
       if (comment == null || request.Id != comment.Id)
       {
-        return new ApiResponse<CommentResponse>(404, "Bình luận không tồn tại!", null);
+        return new ApiResponse<CommentDto>(404, "Bình luận không tồn tại!", null);
       }
       //check image
       string? imageUrl = null;
@@ -147,7 +148,7 @@ namespace SocialMedia.Services
         var uploadResult = await _imageService.UploadImage(new UploadImageRequest { Image = request.ImageUrl });
         if (uploadResult.Status != 201)
         {
-          return new ApiResponse<CommentResponse>(400, "Tải ảnh lên thất bại!", null);
+          return new ApiResponse<CommentDto>(400, "Tải ảnh lên thất bại!", null);
         }
         imageUrl = uploadResult.Data;
       }
@@ -170,9 +171,9 @@ namespace SocialMedia.Services
       }
       else
       {
-        return new ApiResponse<CommentResponse>(400, $"Comment {comment.Id} không có sự thay đổi gì!", null);
+        return new ApiResponse<CommentDto>(400, $"Comment {comment.Id} không có sự thay đổi gì!", null);
       }
-      return new ApiResponse<CommentResponse>(200, $"Bạn đã sửa bình luận bài viết {comment.PostId} thành công!", new CommentResponse
+      return new ApiResponse<CommentDto>(200, $"Bạn đã sửa bình luận bài viết {comment.PostId} thành công!", new CommentDto
       {
         Id = comment.Id,
         Content = comment.Content,
@@ -181,37 +182,37 @@ namespace SocialMedia.Services
         UserId = user.Id
       });
     }
-    public async Task<ApiResponse<CommentResponse>> DeleteComment(int commentId)
+    public async Task<ApiResponse<CommentDto>> DeleteComment(int commentId)
     {
       //check user
       var email = GetCurrentUserEmail();
       if (string.IsNullOrEmpty(email))
       {
-        return new ApiResponse<CommentResponse>(401, "Không thể xác thực người dùng!", null);
+        return new ApiResponse<CommentDto>(401, "Không thể xác thực người dùng!", null);
       }
       var user = await GetUserByEmailAsync(email);
       if (user == null)
       {
-        return new ApiResponse<CommentResponse>(404, "Người dùng không tồn tại!", null);
+        return new ApiResponse<CommentDto>(404, "Người dùng không tồn tại!", null);
       }
       //check requet
       if (commentId <= 0 || commentId == 0)
       {
-        return new ApiResponse<CommentResponse>(400, "Comment ID không hợp lệ!", null);
+        return new ApiResponse<CommentDto>(400, "Comment ID không hợp lệ!", null);
       }
       //check comment
       var comment = await _commentRepository.GetCommentById(commentId);
       if (comment == null || commentId != comment.Id)
       {
-        return new ApiResponse<CommentResponse>(404, "Bình luận không tồn tại!", null);
+        return new ApiResponse<CommentDto>(404, "Bình luận không tồn tại!", null);
       }
       if (comment.UserId != user.Id)
       {
-        return new ApiResponse<CommentResponse>(403, "Bạn không có quyền xóa bình luận này!", null);
+        return new ApiResponse<CommentDto>(403, "Bạn không có quyền xóa bình luận này!", null);
       }
       //delete comment
       await _commentRepository.DeleteComment(commentId);
-      return new ApiResponse<CommentResponse>(204, $"Bạn đã xóa bình luận bài viết {comment.PostId} thành công!", null);
+      return new ApiResponse<CommentDto>(204, $"Bạn đã xóa bình luận bài viết {comment.PostId} thành công!", null);
     }
   }
 }

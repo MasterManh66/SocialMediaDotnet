@@ -1,13 +1,13 @@
-﻿using SocialMedia.Models.Dto.Request;
-using SocialMedia.Models.Dto.Response;
+﻿using SocialMedia.Models.Dto;
+using SocialMedia.Models.Dto.Comment;
 
 namespace SocialMedia.Services
 {
   public interface ICommentService
   {
-    Task<ApiResponse<CommentResponse>> CommentPost(CommentRequest request);
-    Task<ApiResponse<List<CommentResponse>>> CommentsOfUser();
-    Task<ApiResponse<CommentResponse>> EditComment(CommentEditRequest request);
-    Task<ApiResponse<CommentResponse>> DeleteComment(int commentId);
+    Task<ApiResponse<CommentDto>> CommentPost(AddCommentRequestDto request);
+    Task<ApiResponse<List<CommentDto>>> CommentsOfUser();
+    Task<ApiResponse<CommentDto>> EditComment(UpdateCommentRequestDto request);
+    Task<ApiResponse<CommentDto>> DeleteComment(int commentId);
   }
 }

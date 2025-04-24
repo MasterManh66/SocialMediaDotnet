@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SocialMedia.Models.Dto.Request;
+using SocialMedia.Models.Dto;
 using SocialMedia.Services;
 
 namespace SocialMedia.Controllers

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SocialMedia.Models.Dto.Request;
+using SocialMedia.Models.Dto.User;
 using SocialMedia.Services;
 
 namespace SocialMedia.Controllers
@@ -17,7 +17,7 @@ namespace SocialMedia.Controllers
     }
 
     [HttpPost("RegisterUser")]
-    public async Task<IActionResult> RegisterUser([FromBody] RegisterUserRequest request)
+    public async Task<IActionResult> RegisterUser([FromBody] RegisterUserRequestDto request)
     {
       if (!ModelState.IsValid)
       {
@@ -32,7 +32,7 @@ namespace SocialMedia.Controllers
     }
 
     [HttpPost("LoginUser")]
-    public async Task<IActionResult> LoginUser([FromBody] LoginUserRequest request)
+    public async Task<IActionResult> LoginUser([FromBody] LoginUserRequestDto request)
     {
       if (!ModelState.IsValid)
       {
@@ -47,7 +47,7 @@ namespace SocialMedia.Controllers
     }
 
     [HttpPost("VerifyOtp")]
-    public async Task<IActionResult> VerifyOtp([FromBody] AuthRequest request)
+    public async Task<IActionResult> VerifyOtp([FromBody] AuthUserRequestDto request)
     {
       if (!ModelState.IsValid)
       {
@@ -62,7 +62,7 @@ namespace SocialMedia.Controllers
     }
 
     [HttpPost("ForgetPassword")]
-    public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordRequest request)
+    public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordRequestDto request)
     {
       if (!ModelState.IsValid)
       {
@@ -77,7 +77,7 @@ namespace SocialMedia.Controllers
     }
 
     [HttpPost("VerifyForgetPassword")]
-    public async Task<IActionResult> VerifyForgetPassword([FromBody] VerifyForgetPasswordRequest request)
+    public async Task<IActionResult> VerifyForgetPassword([FromBody] VerifyForgetPasswordRequestDto request)
     {
       if (!ModelState.IsValid)
       {
@@ -93,7 +93,7 @@ namespace SocialMedia.Controllers
 
     [Authorize]
     [HttpPut("ChangePassword")]
-    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto request)
     {
       if (!ModelState.IsValid)
       {
@@ -121,7 +121,7 @@ namespace SocialMedia.Controllers
 
     [Authorize]
     [HttpPut("UpdateUser")]
-    public async Task<IActionResult> UpdateUser([FromForm] UserRequest request)
+    public async Task<IActionResult> UpdateUser([FromForm] UpdateUserRequestDto request)
     {
       var response = await _userService.UpdateUser(request);
       if (response.Status == 200)

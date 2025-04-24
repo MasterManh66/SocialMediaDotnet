@@ -1,8 +1,9 @@
 ﻿using System.Security.Claims;
+using SocialMedia.Models.Domain.Enums;
+using SocialMedia.Models.Dto;
+using SocialMedia.Models.Dto.Post;
 using SocialMedia.Models.Dto.Request;
-using SocialMedia.Models.Dto.Response;
 using SocialMedia.Models.Entities;
-using SocialMedia.Models.Enums;
 using SocialMedia.Repositories;
 
 namespace SocialMedia.Services
@@ -34,25 +35,25 @@ namespace SocialMedia.Services
     {
       return _userRepository.GetByEmailAsync(email);
     }
-    public async Task<ApiResponse<PostResponse>> CreatePost(PostCreateRequest request)
+    public async Task<ApiResponse<PostDto>> CreatePost(AddPostRequestDto request)
     {
       //check user
       var email = GetCurrentUserEmail();
       if (string.IsNullOrEmpty(email))
       {
-        return new ApiResponse<PostResponse>(401, "Không thể xác thực người dùng!", null);
+        return new ApiResponse<PostDto>(401, "Không thể xác thực người dùng!", null);
       }
       var user = await GetUserByEmailAsync(email);
       if (user == null)
       {
-        return new ApiResponse<PostResponse>(404, "Người dùng không tồn tại!", null);
+        return new ApiResponse<PostDto>(404, "Người dùng không tồn tại!", null);
       }
       var infoUser = await _userRepository.GetUserById(user.Id);
       string author = $"{infoUser!.FirstName} {infoUser.LastName}";
       //check request
       if (string.IsNullOrWhiteSpace(request.Title) || string.IsNullOrWhiteSpace(request.Content))
       {
-        return new ApiResponse<PostResponse>(400, "Tiêu đề hoặc Nội dung đang bị trống!", null);
+        return new ApiResponse<PostDto>(400, "Tiêu đề hoặc Nội dung đang bị trống!", null);
       }
       //check image
       string? imageUrl = null;
@@ -61,7 +62,7 @@ namespace SocialMedia.Services
         var uploadResult = await _imageService.UploadImage(new UploadImageRequest { Image = request.ImageUrl });
         if (uploadResult.Status != 201)
         {
-          return new ApiResponse<PostResponse>(400, "Tải ảnh lên thất bại!", null);
+          return new ApiResponse<PostDto>(400, "Tải ảnh lên thất bại!", null);
         }
         imageUrl = uploadResult.Data;
       }
@@ -76,7 +77,7 @@ namespace SocialMedia.Services
       };
       //add database
       await _postRepository.CreatePost(newPost);
-      return new ApiResponse<PostResponse>(201, "Bạn đã tạo bài viết thành công!", new PostResponse
+      return new ApiResponse<PostDto>(201, "Bạn đã tạo bài viết thành công!", new PostDto
         {
           Id = newPost.Id,
           Title = newPost.Title,
@@ -87,18 +88,18 @@ namespace SocialMedia.Services
           Author = author
       });
     }
-    public async Task<ApiResponse<PostResponse>> UpdatePost(PostEditRequest request)
+    public async Task<ApiResponse<PostDto>> UpdatePost(UpdatePostRequestDto request)
     {
       //check user
       var email = GetCurrentUserEmail();
       if (string.IsNullOrEmpty(email))
       {
-        return new ApiResponse<PostResponse>(401, "Không thể xác thực người dùng!", null);
+        return new ApiResponse<PostDto>(401, "Không thể xác thực người dùng!", null);
       }
       var user = await GetUserByEmailAsync(email);
       if (user == null)
       {
-        return new ApiResponse<PostResponse>(404, "Người dùng không tồn tại!", null);
+        return new ApiResponse<PostDto>(404, "Người dùng không tồn tại!", null);
       }
       var infoUser = await _userRepository.GetUserById(user.Id);
       string author = $"{infoUser!.FirstName} {infoUser.LastName}";
@@ -109,7 +110,7 @@ namespace SocialMedia.Services
         var uploadResult = await _imageService.UploadImage(new UploadImageRequest { Image = request.ImageUrl });
         if (uploadResult.Status != 201)
         {
-          return new ApiResponse<PostResponse>(400, "Tải ảnh lên thất bại!", null);
+          return new ApiResponse<PostDto>(400, "Tải ảnh lên thất bại!", null);
         }
         imageUrl = uploadResult.Data;
       }
@@ -118,11 +119,11 @@ namespace SocialMedia.Services
       var post = await _postRepository.GetPostById(request.Id);
       if (post == null)
       {
-        return new ApiResponse<PostResponse>(400, $"Bài viết {request.Id} không tồn tại!", null);
+        return new ApiResponse<PostDto>(400, $"Bài viết {request.Id} không tồn tại!", null);
       }
       if (user.Id != post.UserId)
       {
-        return new ApiResponse<PostResponse>(403, $"Bạn không có quyền chỉnh sửa bài viết của {user.FirstName + "" + user.LastName}", null);
+        return new ApiResponse<PostDto>(403, $"Bạn không có quyền chỉnh sửa bài viết của {user.FirstName + "" + user.LastName}", null);
       }
       if (!string.IsNullOrEmpty(request.Title) && request.Title != post.Title)
       {
@@ -148,7 +149,7 @@ namespace SocialMedia.Services
       {
         await _postRepository.UpdatePost(post);
       }
-      return new ApiResponse<PostResponse>(200, $"Chỉnh sửa bài viết {post.Id} thành công !", new PostResponse
+      return new ApiResponse<PostDto>(200, $"Chỉnh sửa bài viết {post.Id} thành công !", new PostDto
       {
         Id = post.Id,
         Title = post.Title,
@@ -159,25 +160,25 @@ namespace SocialMedia.Services
         Author = author
       });
     }
-    public async Task<ApiResponse<List<PostResponse>>> GetPost()
+    public async Task<ApiResponse<List<PostDto>>> GetPost()
     {
       //check user
       var email = GetCurrentUserEmail();
       if (string.IsNullOrEmpty(email))
       {
-        return new ApiResponse<List<PostResponse>>(401, "Không thể xác thực người dùng!", null);
+        return new ApiResponse<List<PostDto>>(401, "Không thể xác thực người dùng!", null);
       }
       var user = await GetUserByEmailAsync(email);
       
       if (user == null)
       {
-        return new ApiResponse<List<PostResponse>>(404, "Người dùng không tồn tại!", null);
+        return new ApiResponse<List<PostDto>>(404, "Người dùng không tồn tại!", null);
       }
       //Get List Post By User
       var post = await _postRepository.GetPostsByUserId(user.Id);
       var infoUser = await _userRepository.GetUserById(user.Id);
       string author = $"{infoUser!.FirstName} {infoUser.LastName}";
-      var postResponses = post.Select(p => new PostResponse
+      var postResponses = post.Select(p => new PostDto
       {
         Id = p.Id,
         Title = p.Title,
@@ -187,7 +188,7 @@ namespace SocialMedia.Services
         UserId = p.UserId,
         Author = author
       }).ToList();
-      return new ApiResponse<List<PostResponse>>(200, $"Lấy thành công danh sách bài viết của người dùng {author}!", postResponses);
+      return new ApiResponse<List<PostDto>>(200, $"Lấy thành công danh sách bài viết của người dùng {author}!", postResponses);
     }
     public async Task<ApiResponse<string>> DeletePost(int postId)
     {
@@ -216,27 +217,27 @@ namespace SocialMedia.Services
       await _postRepository.DeletePost(postId);
       return new ApiResponse<string>(200, $"Bạn đã xoá bài viết {postId} thành công!", null);
     }
-    public async Task<ApiResponse<List<PostResponse>>> SearchPost(string keyWord)
+    public async Task<ApiResponse<List<PostDto>>> SearchPost(string keyWord)
     {
       //check user
       var email = GetCurrentUserEmail();
       if (string.IsNullOrEmpty(email))
       {
-        return new ApiResponse<List<PostResponse>>(401, "Không thể xác thực người dùng!", null);
+        return new ApiResponse<List<PostDto>>(401, "Không thể xác thực người dùng!", null);
       }
       var user = await GetUserByEmailAsync(email);
       if (user == null)
       {
-        return new ApiResponse<List<PostResponse>>(404, "Người dùng không tồn tại!", null);
+        return new ApiResponse<List<PostDto>>(404, "Người dùng không tồn tại!", null);
       }
       //check request
       if (string.IsNullOrWhiteSpace(keyWord))
       {
-        return new ApiResponse<List<PostResponse>>(400, "Từ khoá tìm kiếm đang bị trống hoặc là khoảng trắng!", null);
+        return new ApiResponse<List<PostDto>>(400, "Từ khoá tìm kiếm đang bị trống hoặc là khoảng trắng!", null);
       }
       //search
       var post = await _postRepository.SearchPostByKey(keyWord);
-      var postResponses = post.Select(p => new PostResponse
+      var postResponses = post.Select(p => new PostDto
       {
         Id = p.Id,
         Title = p.Title,
@@ -248,24 +249,24 @@ namespace SocialMedia.Services
       }).ToList();
       if (postResponses.Count > 0) 
       {
-        return new ApiResponse<List<PostResponse>>(200, $"Tìm kiếm theo từ khoá {keyWord} thành công !", postResponses);
+        return new ApiResponse<List<PostDto>>(200, $"Tìm kiếm theo từ khoá {keyWord} thành công !", postResponses);
       } else
       {
-        return new ApiResponse<List<PostResponse>>(204, $"Từ khoá {keyWord} không có kết quả trùng hợp !", postResponses);
+        return new ApiResponse<List<PostDto>>(204, $"Từ khoá {keyWord} không có kết quả trùng hợp !", postResponses);
       }
     }
-    public async Task<ApiResponse<List<PostResponse>>> GetTimeLine()
+    public async Task<ApiResponse<List<PostDto>>> GetTimeLine()
     {
       //check user
       var email = GetCurrentUserEmail();
       if (string.IsNullOrEmpty(email))
       {
-        return new ApiResponse<List<PostResponse>>(401, "Không thể xác thực người dùng!", null);
+        return new ApiResponse<List<PostDto>>(401, "Không thể xác thực người dùng!", null);
       }
       var user = await GetUserByEmailAsync(email);
       if (user == null)
       {
-        return new ApiResponse<List<PostResponse>>(404, "Người dùng không tồn tại!", null);
+        return new ApiResponse<List<PostDto>>(404, "Người dùng không tồn tại!", null);
       }
       //check post of user
       var postUser = await _postRepository.GetPostsByUserId(user.Id);
@@ -281,9 +282,9 @@ namespace SocialMedia.Services
       var allPosts = postUserFiltered.Concat(postFriendFiltered).OrderByDescending(p => p.CreatedAt).ToList();
       if (!allPosts.Any())
       {
-        return new ApiResponse<List<PostResponse>>(404, "Timeline không có bài viết mới nào!", null);
+        return new ApiResponse<List<PostDto>>(404, "Timeline không có bài viết mới nào!", null);
       }
-      var postResponse = allPosts.Select(p => new PostResponse
+      var postResponse = allPosts.Select(p => new PostDto
       {
         Id = p.Id,
         Title = p.Title,
@@ -293,7 +294,7 @@ namespace SocialMedia.Services
         Author = "Anonymus",
         PostStatus = p.PostStatus
       }).ToList();
-      return new ApiResponse<List<PostResponse>>(200, "Lấy thành công danh sách Time Line của bạn!", postResponse);
+      return new ApiResponse<List<PostDto>>(200, "Lấy thành công danh sách Time Line của bạn!", postResponse);
     }
   }
 }
