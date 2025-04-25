@@ -7,6 +7,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using ClosedXML.Excel;
 using SocialMedia.Models.Dto.User;
+using AutoMapper;
+using Azure;
 
 namespace SocialMedia.Services
 {
@@ -21,10 +23,11 @@ namespace SocialMedia.Services
     private readonly RedisService _redisService;
     private readonly IJwtService _jwtService;
     private readonly IImageService _imageService;
+    private readonly IMapper _mapper;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public UserService(IUserRepository userRepository, IRoleRepository roleRepository, RedisService redisService,
-                      IJwtService jwtService, IHttpContextAccessor httpContextAccessor, IImageService imageService,
+                      IJwtService jwtService, IHttpContextAccessor httpContextAccessor, IImageService imageService, IMapper mapper,
                       IPostRepository postRepository, ICommentRepository commentRepository, ILikeRepository likeRepository, IFriendRepository friendRepository)
     {
       _userRepository = userRepository;
@@ -35,6 +38,7 @@ namespace SocialMedia.Services
       _roleRepository = roleRepository;
       _redisService = redisService;
       _jwtService = jwtService;
+      _mapper = mapper;
       _httpContextAccessor = httpContextAccessor;
       _imageService = imageService;
     }
@@ -218,36 +222,25 @@ namespace SocialMedia.Services
       return new ApiResponse<string>(200, "Mật khẩu đã được thay đổi thành công", null);
     }
 
-    public async Task<ApiResponse<UpdateUserResponseDto>> GetUser()
+    public async Task<ApiResponse<UserDto>> GetUser()
     {
       //check token
       var email = GetCurrentUserEmail();
       if (string.IsNullOrEmpty(email))
       {
-        return new ApiResponse<UpdateUserResponseDto>(401, "Không thể xác thực người dùng!", null);
+        return new ApiResponse<UserDto>(401, "Không thể xác thực người dùng!", null);
       }
       //get user by email
       var user = await GetUserByEmailAsync(email);
+      var response = _mapper.Map<UserDto>(user);
       if (user == null)
       {
-        return new ApiResponse<UpdateUserResponseDto>(404, "Người dùng không tồn tại!", null);
+        return new ApiResponse<UserDto>(404, "Người dùng không tồn tại!", null);
       }
-      return new ApiResponse<UpdateUserResponseDto>(200, "Lấy thành công thông tin của bạn", new UpdateUserResponseDto
-      {
-        Id = user.Id,
-        FirstName = user.FirstName,
-        LastName = user.LastName,
-        FullName = user.FirstName + " " + user.LastName,
-        Email = user.Email,
-        Address = user.Address,
-        Job = user.Job,
-        ImageUrl = user.ImageUrl,
-        DateOfBirth = user.DateOfBirth,
-        Gender = user.Gender
-      });
+      return new ApiResponse<UserDto>(200, "Lấy thành công thông tin của bạn", response);
     }
 
-    public async Task<ApiResponse<UpdateUserResponseDto>> UpdateUser(UpdateUserRequestDto request)
+    public async Task<ApiResponse<UserDto>> UpdateUser(UpdateUserRequestDto request)
     {
       //check image
       string? imageUrl = null;
@@ -256,7 +249,7 @@ namespace SocialMedia.Services
         var uploadResult = await _imageService.UploadImage(new UploadImageRequest { Image = request.ImageUrl });
         if (uploadResult.Status != 201)
         {
-          return new ApiResponse<UpdateUserResponseDto>(400, "Tải ảnh lên thất bại!", null);
+          return new ApiResponse<UserDto>(400, "Tải ảnh lên thất bại!", null);
         }
         imageUrl = uploadResult.Data;
       }
@@ -264,12 +257,12 @@ namespace SocialMedia.Services
       var enail = GetCurrentUserEmail();
       if (string.IsNullOrEmpty(enail))
       {
-        return new ApiResponse<UpdateUserResponseDto>(401, "Không thể xác thực người dùng!", null);
+        return new ApiResponse<UserDto>(401, "Không thể xác thực người dùng!", null);
       }
       var user = await GetUserByEmailAsync(enail);
       if (user == null)
       {
-        return new ApiResponse<UpdateUserResponseDto>(404, "Người dùng không tồn tại!", null);
+        return new ApiResponse<UserDto>(404, "Người dùng không tồn tại!", null);
       }
       //update user
       bool isUpdated = false;
@@ -310,24 +303,13 @@ namespace SocialMedia.Services
       }
       if (!isUpdated)
       {
-        return new ApiResponse<UpdateUserResponseDto>(400, "Không có thông tin nào để cập nhật!", null);
+        return new ApiResponse<UserDto>(400, "Không có thông tin nào để cập nhật!", null);
       } else
       {
         await _userRepository.UpdateAsync(user);
       }
-      return new ApiResponse<UpdateUserResponseDto>(200, "Cập nhật thành công thông tin của bạn!", new UpdateUserResponseDto
-      {
-        Id = user.Id,
-        FirstName = user.FirstName,
-        LastName = user.LastName,
-        FullName = user.FirstName + "" + user.LastName,
-        Email = user.Email,
-        Address = user.Address,
-        Job = user.Job,
-        ImageUrl = user.ImageUrl,
-        DateOfBirth = user.DateOfBirth,
-        Gender = user.Gender,
-      });
+      var response = _mapper.Map<UserDto>(user);
+      return new ApiResponse<UserDto>(200, "Cập nhật thành công thông tin của bạn!", response);
     }
 
     public async Task<List<UserReportResponseDto>> ReportOfUser()

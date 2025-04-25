@@ -4,10 +4,10 @@ using SocialMedia.Models.Entities;
 
 namespace SocialMedia.Repositories
 {
-  public class SqlPostRepository : IPostRepository
+  public class SqlPostRepository : SqlGenericRepository<Post>, IPostRepository
   {
     private readonly AppDbContext _context;
-    public SqlPostRepository(AppDbContext context) 
+    public SqlPostRepository(AppDbContext context) : base(context)
     {
       _context = context;
     }
@@ -31,28 +31,6 @@ namespace SocialMedia.Repositories
           .Include(p => p.User)
           .Where(p => userIds.Contains(p.UserId))
           .ToListAsync();
-    }
-    public async Task<Post?> CreatePost(Post post)
-    {
-      await _context.Posts.AddAsync(post);
-      await _context.SaveChangesAsync();
-      return post;
-    }
-    public async Task<Post?> UpdatePost(Post post)
-    {
-      _context.Posts.Update(post);
-      await _context.SaveChangesAsync();
-      return post;
-    }
-    public async Task<Post?> DeletePost(int id)
-    {
-      var post = await GetPostById(id);
-      if (post != null)
-      {
-        _context.Posts.Remove(post);
-        await _context.SaveChangesAsync();
-      }
-      return post;
     }
     public async Task<List<Post>> SearchPostByKey(string keyWord)
     {

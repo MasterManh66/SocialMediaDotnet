@@ -2,7 +2,7 @@
 
 namespace SocialMedia.Models.Dto.User
 {
-  public class UpdateUserResponseDto
+  public class UserDto
   {
     public int Id { get; set; }
     public string? FirstName { get; set; }

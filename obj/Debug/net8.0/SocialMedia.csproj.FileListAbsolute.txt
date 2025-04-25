@@ -309,3 +309,5 @@ C:\Users\trantienmanh\Project\SocialMediaNetCore\SocialMedia\bin\Debug\net8.0\Ex
 C:\Users\trantienmanh\Project\SocialMediaNetCore\SocialMedia\bin\Debug\net8.0\RBush.dll
 C:\Users\trantienmanh\Project\SocialMediaNetCore\SocialMedia\bin\Debug\net8.0\SixLabors.Fonts.dll
 C:\Users\trantienmanh\Project\SocialMediaNetCore\SocialMedia\bin\Debug\net8.0\System.IO.Packaging.dll
+C:\Users\trantienmanh\Project\SocialMediaNetCore\SocialMedia\bin\Debug\net8.0\AutoMapper.dll
+C:\Users\trantienmanh\Project\SocialMediaNetCore\SocialMedia\bin\Debug\net8.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll

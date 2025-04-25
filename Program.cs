@@ -9,6 +9,7 @@ using SocialMedia.Services;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
 using System.Text.Json;
+using SocialMedia.Mappings;
 
 var builder = WebApplication.CreateBuilder(args);
 var redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? throw new ArgumentNullException("Redis connection string is missing");
@@ -43,6 +44,9 @@ builder.Services.AddScoped<ILikeService, LikeService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IFriendService, FriendService>();
 builder.Services.AddScoped<RedisService>();
+
+//Add Auto Mapper
+builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 
 builder.Services.AddSwaggerGen(c =>
 {

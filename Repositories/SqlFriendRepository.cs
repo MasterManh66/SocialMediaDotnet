@@ -5,16 +5,12 @@ using SocialMedia.Models.Entities;
 
 namespace SocialMedia.Repositories
 {
-  public class SqlFriendRepository : IFriendRepository
+  public class SqlFriendRepository : SqlGenericRepository<Friend>, IFriendRepository
   {
     private readonly AppDbContext _context;
-    public SqlFriendRepository(AppDbContext context)
+    public SqlFriendRepository(AppDbContext context) : base(context)
     {
       _context = context;
-    }
-    public async Task<Friend?> GetFriendById(int friendId)
-    {
-      return await _context.Friends.FindAsync(friendId);
     }
     public async Task<List<Friend>> GetFriendsByUserId(int userId)
     {
@@ -23,29 +19,6 @@ namespace SocialMedia.Repositories
         .Include(f => f.Requester)
         .Where(f => f.RequesterId == userId || f.ReceiverId == userId)
         .ToListAsync();
-    }
-    public async Task<Friend?> CreateFriend(Friend friend)
-    {
-      await _context.Friends.AddAsync(friend);
-      await _context.SaveChangesAsync();
-      return friend;
-    }
-    public async Task<Friend?> UpdateFriend(Friend friend)
-    {
-      _context.Friends.Update(friend);
-      await _context.SaveChangesAsync();
-      return friend;
-    }
-    public async Task<Friend?> DeleteFriend(int friendId)
-    {
-      var friend = await GetFriendById(friendId);
-      if (friend == null)
-      {
-        return null;
-      }
-      _context.Friends.Remove(friend);
-      await _context.SaveChangesAsync();
-      return friend;
     }
     public async Task<List<Friend>> SearchFriendByKey(string keyword)
     {

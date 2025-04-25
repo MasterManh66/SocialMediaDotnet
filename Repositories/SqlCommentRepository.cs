@@ -4,10 +4,10 @@ using SocialMedia.Models.Entities;
 
 namespace SocialMedia.Repositories
 {
-  public class SqlCommentRepository : ICommentRepository
+  public class SqlCommentRepository : SqlGenericRepository<Comment>, ICommentRepository
   {
     private readonly AppDbContext _context;
-    public SqlCommentRepository(AppDbContext context)
+    public SqlCommentRepository(AppDbContext context) : base(context)
     {
       _context = context;
     }
@@ -36,28 +36,6 @@ namespace SocialMedia.Repositories
     {
       return await _context.Comments
         .FirstOrDefaultAsync(c => c.UserId == userId && c.PostId == postId);
-    }
-    public async Task<Comment?> CreateComment(Comment comment)
-    {
-      await _context.Comments.AddAsync(comment);
-      await _context.SaveChangesAsync();
-      return comment;
-    }
-    public async Task<Comment?> DeleteComment(int id)
-    {
-      var comment = await GetCommentById(id);
-      if (comment != null)
-      {
-        _context.Comments.Remove(comment);
-        await _context.SaveChangesAsync();
-      }
-      return comment;
-    }
-    public async Task<Comment?> UpdateComment(Comment comment)
-    {
-        _context.Comments.Update(comment);
-        await _context.SaveChangesAsync();
-      return comment;
     }
     public async Task<Comment?> GetCommentByIdAndUserId(int id, int userId)
     {

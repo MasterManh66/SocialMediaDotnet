@@ -3,6 +3,7 @@ using System.Security.Claims;
 using SocialMedia.Repositories;
 using SocialMedia.Models.Dto.Like;
 using SocialMedia.Models.Dto;
+using AutoMapper;
 
 namespace SocialMedia.Services
 {
@@ -11,14 +12,16 @@ namespace SocialMedia.Services
     private readonly ILikeRepository _likeRepository;
     private readonly IPostRepository _postRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IMapper _mapper;
     private readonly IHttpContextAccessor _httpContextAccessor;
     public LikeService(IHttpContextAccessor httpContextAccessor, ILikeRepository likeRepository
-                  , IPostRepository postRepository, IUserRepository userRepository)
+                  , IPostRepository postRepository, IUserRepository userRepository, IMapper mapper)
     {
       _httpContextAccessor = httpContextAccessor;
       _likeRepository = likeRepository;
       _postRepository = postRepository;
       _userRepository = userRepository;
+      _mapper = mapper;
     }
     public string? GetCurrentUserEmail()
     {
@@ -61,22 +64,11 @@ namespace SocialMedia.Services
       }
       var author = post.User != null ? $"{post.User.FirstName} {post.User.LastName}" : "Anonymous";
       //create like
-      var newLike = new Like
-      {
-        PostId = request.PostId,
-        UserId = user.Id,
-      };
+      var newLike = _mapper.Map<Like>(request);
       //add database
-      var like = await _likeRepository.CreateLike(newLike);
-      return new ApiResponse<LikeDto>(201, $"Bạn đã thích bài viết {request.PostId} của tác giả {author} thành công!", new LikeDto
-      {
-        Id = newLike.Id,
-        PostId = newLike.PostId,
-        PostTitle = post.Title,
-        UserId = newLike.UserId,
-        Author = author,
-        CreatedAt = newLike.CreatedAt
-      });
+      await _likeRepository.AddAsync(newLike);
+      var response = _mapper.Map<LikeDto>(newLike);
+      return new ApiResponse<LikeDto>(201, $"Bạn đã thích bài viết {request.PostId} của tác giả {author} thành công!", response);
     }
     public async Task<ApiResponse<List<LikeDto>>> LikeOfUser()
     {
@@ -97,14 +89,7 @@ namespace SocialMedia.Services
       {
         return new ApiResponse<List<LikeDto>>(404, "Bạn chưa thích bài viết nào!", null);
       }
-      var likeResponses = likes.Select(l => new LikeDto
-      {
-        Id = l.Id,
-        PostId = l.PostId,
-        PostTitle = l.Post != null ? l.Post.Title : "Title Post",
-        UserId = l.UserId,
-        CreatedAt = l.CreatedAt
-      }).ToList();
+      var likeResponses = _mapper.Map<List<LikeDto>>(likes);
       return new ApiResponse<List<LikeDto>>(200, "Danh sách bài viết đã thích của bạn", likeResponses);
     }
     public async Task<ApiResponse<string>> UnlikePost(AddLikeRequestDto request)
@@ -134,7 +119,7 @@ namespace SocialMedia.Services
         return new ApiResponse<string>(404, "Bạn chưa thích bài viết này!", null);
       }
       //delete like
-      await _likeRepository.DeleteLike(request.PostId);
+      await _likeRepository.DeleteAsync(request.PostId);
       return new ApiResponse<string>(200, $"Bạn đã huỷ like bài viết {post.Id} của {author} thành công!", null);
     }
   }

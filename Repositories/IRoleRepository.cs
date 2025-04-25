@@ -2,10 +2,8 @@
 
 namespace SocialMedia.Repositories
 {
-  public interface IRoleRepository
+  public interface IRoleRepository : IGenericRepository<Role>
   {
     Task<Role?> GetRoleByNameAsync(string roleName);
-    Task AddRoleAsync(Role role);
-    Task SaveChangesAsync();
   }
 }

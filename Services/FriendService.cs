@@ -1,10 +1,10 @@
 ﻿using SocialMedia.Models.Entities;
 using System.Security.Claims;
 using SocialMedia.Repositories;
-using Azure.Core;
 using SocialMedia.Models.Dto.Friend;
 using SocialMedia.Models.Dto;
 using SocialMedia.Models.Domain.Enums;
+using AutoMapper;
 
 namespace SocialMedia.Services
 {
@@ -12,13 +12,15 @@ namespace SocialMedia.Services
   {
     private readonly IFriendRepository _friendRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IMapper _mapper;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public FriendService(IHttpContextAccessor httpContextAccessor, IFriendRepository friendRepository, IUserRepository userRepository)
+    public FriendService(IHttpContextAccessor httpContextAccessor, IFriendRepository friendRepository, IUserRepository userRepository, IMapper mapper)
     {
       _httpContextAccessor = httpContextAccessor;
       _friendRepository = friendRepository;
       _userRepository = userRepository;
+      _mapper = mapper;
     }
     public string? GetCurrentUserEmail()
     {
@@ -75,17 +77,9 @@ namespace SocialMedia.Services
         FriendStatus = FriendEnum.Pending
       };
       //add database
-      await _friendRepository.CreateFriend(newFriend);
-      return new ApiResponse<FriendDto>(201, $"Bạn đã gửi lời mời kết bạn cho người dùng {ReceiverId} thành công!", new FriendDto
-      {
-        UserId = ReceiverId,
-        FullName = $"{receiver.FirstName} {receiver.LastName}",
-        Avatar = receiver.ImageUrl,
-        Address = receiver.Address,
-        Job = receiver.Job,
-        Gender = receiver.Gender,
-        FriendStatus = newFriend.FriendStatus
-      });
+      await _friendRepository.AddAsync(newFriend);
+      var response = _mapper.Map<FriendDto>(newFriend);
+      return new ApiResponse<FriendDto>(201, $"Bạn đã gửi lời mời kết bạn cho người dùng {ReceiverId} thành công!", response);
     }
     public async Task<ApiResponse<List<FriendDto>>> GetFriendsRequest()
     {
@@ -209,7 +203,7 @@ namespace SocialMedia.Services
         return new ApiResponse<FriendDto>(404, $"Không tìm thấy lời mời kết bạn từ người dùng {RequestId}!", null);
       }
       pendingRequest.FriendStatus = FriendEnum.Accepted;
-      await _friendRepository.UpdateFriend(pendingRequest);
+      await _friendRepository.UpdateAsync(pendingRequest);
 
       var sender = pendingRequest.Requester;
       if (sender != null)
@@ -310,7 +304,7 @@ namespace SocialMedia.Services
       {
         return new ApiResponse<string>(404, $"Không có thông tin người dùng {FriendId} này!", null);
       }
-      await _friendRepository.DeleteFriend(pendingRequest.Id);
+      await _friendRepository.DeleteAsync(pendingRequest.Id);
       return new ApiResponse<string>(200, $"Huỷ kết bạn thành công với người dùng {infoFriend.FirstName} {infoFriend.LastName}", null);
     }
     public async Task<ApiResponse<List<FriendDto>>> SearchFriend(string UserName)

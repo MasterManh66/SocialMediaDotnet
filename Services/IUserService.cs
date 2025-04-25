@@ -11,8 +11,8 @@ namespace SocialMedia.Services
     Task<ApiResponse<ForgetPasswordResponseDto>> ForgetPassword(ForgetPasswordRequestDto request);
     Task<ApiResponse<VerifyForgetPasswordResponseDto>> VerifyForgetPasword(VerifyForgetPasswordRequestDto request);
     Task<ApiResponse<string>> ChangePassword(ChangePasswordRequestDto request);
-    Task<ApiResponse<UpdateUserResponseDto>> GetUser();
-    Task<ApiResponse<UpdateUserResponseDto>> UpdateUser(UpdateUserRequestDto request);
+    Task<ApiResponse<UserDto>> GetUser();
+    Task<ApiResponse<UserDto>> UpdateUser(UpdateUserRequestDto request);
     Task<List<UserReportResponseDto>> ReportOfUser();
     byte[] ExportUserReportsToExcel(List<UserReportResponseDto> reports);
   }

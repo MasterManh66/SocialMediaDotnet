@@ -1,9 +1,9 @@
 ﻿using SocialMedia.Models.Entities;
 using System.Security.Claims;
 using SocialMedia.Repositories;
-using SocialMedia.Models.Dto.Request;
 using SocialMedia.Models.Dto.Comment;
 using SocialMedia.Models.Dto;
+using AutoMapper;
 
 namespace SocialMedia.Services
 {
@@ -14,9 +14,10 @@ namespace SocialMedia.Services
     private readonly IUserService _userService;
     private readonly IUserRepository _userRepository;
     private readonly IImageService _imageService;
+    private readonly IMapper _mapper;
     private readonly IHttpContextAccessor _httpContextAccessor;
     public CommentService(IHttpContextAccessor httpContextAccessor, ICommentRepository commentRepository, IUserRepository userRepository
-                      , IPostRepository postRepository, IUserService userService, IImageService imageService)
+                      , IPostRepository postRepository, IUserService userService, IImageService imageService, IMapper mapper)
     {
       _httpContextAccessor = httpContextAccessor;
       _commentRepository = commentRepository;
@@ -24,6 +25,7 @@ namespace SocialMedia.Services
       _postRepository = postRepository;
       _userService = userService;
       _imageService = imageService;
+      _mapper = mapper;
     }
     public string? GetCurrentUserEmail()
     {
@@ -73,24 +75,11 @@ namespace SocialMedia.Services
         imageUrl = uploadResult.Data;
       }
       //created Comment
-      var newComment = new Comment
-      {
-        Content = request.Content,
-        ImageUrl = imageUrl,
-        PostId = request.PostId,
-        UserId = user.Id,
-      };
+      var newComment = _mapper.Map<Comment>(request);
       //add database
-      await _commentRepository.CreateComment(newComment);
-      return new ApiResponse<CommentDto>(201, $"Bạn đã bình luận bài viết {post.Id} thành công!", new CommentDto
-      {
-        Id = newComment.Id,
-        Content = newComment.Content,
-        ImageUrl = newComment.ImageUrl,
-        Author = author,
-        PostId = newComment.PostId,
-        UserId = user.Id
-      });
+      await _commentRepository.AddAsync(newComment);
+      var response = _mapper.Map<CommentDto>(newComment);
+      return new ApiResponse<CommentDto>(201, $"Bạn đã bình luận bài viết {post.Id} thành công!", response);
     }
     public async Task<ApiResponse<List<CommentDto>>> CommentsOfUser()
     {
@@ -112,14 +101,7 @@ namespace SocialMedia.Services
         return new ApiResponse<List<CommentDto>>(404, "Người dùng chưa bình luận bài viết nào!", null);
       }
       //get comment
-      var commentResponses = comments.Select(c => new CommentDto
-      {
-        Id = c.Id,
-        Content = c.Content,
-        ImageUrl = c.ImageUrl,
-        PostId = c.PostId,
-        UserId = c.UserId
-      }).ToList();
+      var commentResponses = _mapper.Map<List<CommentDto>>(comments);
       return new ApiResponse<List<CommentDto>>(200, "Lấy danh sách bình luận thành công!", commentResponses);
     }
     public async Task<ApiResponse<CommentDto>> EditComment(UpdateCommentRequestDto request)
@@ -167,20 +149,14 @@ namespace SocialMedia.Services
       //add database
       if (isUpdate)
       {
-        await _commentRepository.UpdateComment(comment);
+        await _commentRepository.UpdateAsync(comment);
       }
       else
       {
         return new ApiResponse<CommentDto>(400, $"Comment {comment.Id} không có sự thay đổi gì!", null);
       }
-      return new ApiResponse<CommentDto>(200, $"Bạn đã sửa bình luận bài viết {comment.PostId} thành công!", new CommentDto
-      {
-        Id = comment.Id,
-        Content = comment.Content,
-        ImageUrl = comment.ImageUrl,
-        PostId = comment.PostId,
-        UserId = user.Id
-      });
+      var response = _mapper.Map<CommentDto>(comment);
+      return new ApiResponse<CommentDto>(200, $"Bạn đã sửa bình luận bài viết {comment.PostId} thành công!", response);
     }
     public async Task<ApiResponse<CommentDto>> DeleteComment(int commentId)
     {
@@ -211,7 +187,7 @@ namespace SocialMedia.Services
         return new ApiResponse<CommentDto>(403, "Bạn không có quyền xóa bình luận này!", null);
       }
       //delete comment
-      await _commentRepository.DeleteComment(commentId);
+      await _commentRepository.DeleteAsync(commentId);
       return new ApiResponse<CommentDto>(204, $"Bạn đã xóa bình luận bài viết {comment.PostId} thành công!", null);
     }
   }

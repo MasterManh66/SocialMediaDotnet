@@ -1,8 +1,8 @@
 ﻿using System.Security.Claims;
+using AutoMapper;
 using SocialMedia.Models.Domain.Enums;
 using SocialMedia.Models.Dto;
 using SocialMedia.Models.Dto.Post;
-using SocialMedia.Models.Dto.Request;
 using SocialMedia.Models.Entities;
 using SocialMedia.Repositories;
 
@@ -15,9 +15,10 @@ namespace SocialMedia.Services
     private readonly IImageService _imageService;
     private readonly IUserRepository _userRepository;
     private readonly IFriendRepository _friendRepository;
+    private readonly IMapper _mapper;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public PostService(IUserRepository userRepository,IUserService userService, IPostRepository postRepository, 
+    public PostService(IUserRepository userRepository,IUserService userService, IPostRepository postRepository, IMapper mapper, 
                       IImageService imageService, IHttpContextAccessor httpContextAccessor, IFriendRepository friendRepository)
     {
       _userService = userService;
@@ -25,6 +26,7 @@ namespace SocialMedia.Services
       _userRepository = userRepository;
       _imageService = imageService;
       _friendRepository = friendRepository;
+      _mapper = mapper;
       _httpContextAccessor = httpContextAccessor;
     }
     public string? GetCurrentUserEmail()
@@ -67,26 +69,11 @@ namespace SocialMedia.Services
         imageUrl = uploadResult.Data;
       }
       //created Post
-      var newPost = new Post
-      {
-        Title = request.Title,
-        Content = request.Content,
-        ImageUrl = imageUrl,
-        UserId = user.Id,
-        PostStatus = request.PostStatus
-      };
+      var newPost = _mapper.Map<Post>(request);
       //add database
-      await _postRepository.CreatePost(newPost);
-      return new ApiResponse<PostDto>(201, "Bạn đã tạo bài viết thành công!", new PostDto
-        {
-          Id = newPost.Id,
-          Title = newPost.Title,
-          Content = newPost.Content,
-          ImageUrl = newPost.ImageUrl,
-          PostStatus = newPost.PostStatus,
-          UserId = newPost.UserId,
-          Author = author
-      });
+      await _postRepository.AddAsync(newPost);
+      var response = _mapper.Map<PostDto>(newPost);
+      return new ApiResponse<PostDto>(201, "Bạn đã tạo bài viết thành công!", response);
     }
     public async Task<ApiResponse<PostDto>> UpdatePost(UpdatePostRequestDto request)
     {
@@ -147,18 +134,10 @@ namespace SocialMedia.Services
       }
       if (isUpdate)
       {
-        await _postRepository.UpdatePost(post);
+        await _postRepository.UpdateAsync(post);
       }
-      return new ApiResponse<PostDto>(200, $"Chỉnh sửa bài viết {post.Id} thành công !", new PostDto
-      {
-        Id = post.Id,
-        Title = post.Title,
-        Content = post.Content,
-        ImageUrl = post.ImageUrl,
-        PostStatus = post.PostStatus,
-        UserId = post.UserId,
-        Author = author
-      });
+      var response = _mapper.Map<PostDto>(post);
+      return new ApiResponse<PostDto>(200, $"Chỉnh sửa bài viết {post.Id} thành công !", response);
     }
     public async Task<ApiResponse<List<PostDto>>> GetPost()
     {
@@ -214,7 +193,7 @@ namespace SocialMedia.Services
         return new ApiResponse<string>(403, $"Bạn không có quyền xoá bài viết {postId} này!", null);
       }
       //delete post
-      await _postRepository.DeletePost(postId);
+      await _postRepository.DeleteAsync(postId);
       return new ApiResponse<string>(200, $"Bạn đã xoá bài viết {postId} thành công!", null);
     }
     public async Task<ApiResponse<List<PostDto>>> SearchPost(string keyWord)

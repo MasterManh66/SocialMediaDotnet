@@ -4,10 +4,10 @@ using SocialMedia.Models.Entities;
 
 namespace SocialMedia.Repositories
 {
-  public class SqlLikeRepository : ILikeRepository
+  public class SqlLikeRepository : SqlGenericRepository<Like>, ILikeRepository
   {
     private readonly AppDbContext _context;
-    public SqlLikeRepository(AppDbContext context) 
+    public SqlLikeRepository(AppDbContext context) : base(context)
     {
       _context = context;
     }
@@ -36,22 +36,6 @@ namespace SocialMedia.Repositories
     {
       return await _context.Likes
         .FirstOrDefaultAsync(l => l.UserId == userId && l.PostId == postId);
-    }
-    public async Task<Like?> CreateLike(Like like)
-    {
-      await _context.Likes.AddAsync(like);
-      await _context.SaveChangesAsync();
-      return like;
-    }
-    public async Task<Like?> DeleteLike(int id)
-    {
-      var like = await GetLikeById(id);
-      if (like != null)
-      {
-        _context.Likes.Remove(like);
-        await _context.SaveChangesAsync();
-      }
-      return like;
     }
     public async Task<int> CountLikeByUserId(int userId, DateTime startDate, DateTime endDate)
     {

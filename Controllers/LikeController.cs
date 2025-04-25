@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SocialMedia.Models.Dto.Like;
-using SocialMedia.Models.Dto.Response;
 using SocialMedia.Services;
 
 namespace SocialMedia.Controllers
