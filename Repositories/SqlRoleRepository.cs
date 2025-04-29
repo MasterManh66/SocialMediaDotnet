@@ -6,12 +6,7 @@ namespace SocialMedia.Repositories
 {
   public class SqlRoleRepository : SqlGenericRepository<Role>, IRoleRepository
   {
-    private readonly AppDbContext _context;
-
-    public SqlRoleRepository(AppDbContext context) : base(context)
-    {
-      _context = context;
-    }
+    public SqlRoleRepository(AppDbContext context) : base(context) {}
 
     public async Task<Role?> GetRoleByNameAsync(string roleName)
     {

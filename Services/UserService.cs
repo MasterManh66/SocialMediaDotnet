@@ -53,17 +53,6 @@ namespace SocialMedia.Services
 
     public async Task<ApiResponse<string>> RegisterUser(RegisterUserRequestDto request)
     {
-      //check request
-      if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
-      {
-        return new ApiResponse<string>(400, "Email hoặc password chỉ là khoảng trắng", null);
-      }
-      //Check user already exists
-      var user = await _userRepository.GetUserByEmailAsync(request.Email.ToLower());
-      if (user != null)
-      {
-        return new ApiResponse<string>(409, "Người dùng đã tồn tại!", null);
-      }
       //check Role User
       var role = await _roleRepository.GetRoleByNameAsync("User");
       if (role == null)
@@ -92,11 +81,6 @@ namespace SocialMedia.Services
 
     public async Task<ApiResponse<LoginUserResponseDto>> LoginUser(LoginUserRequestDto request)
     {
-      //check request
-      if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
-      {
-        return new ApiResponse<LoginUserResponseDto>(400, "Email hoặc password đang là khoảng trống", null);
-      }
       //check user exists
       var user = await _userRepository.GetUserByEmailAsync(request.Email.ToLower());
       if (user == null)
@@ -120,11 +104,6 @@ namespace SocialMedia.Services
 
     public async Task<ApiResponse<AuthUserResponseDto>> VerifyOtp(AuthUserRequestDto request)
     {
-      //check request
-      if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Otp))
-      {
-        return new ApiResponse<AuthUserResponseDto>(400, "Otp hoặc Email chỉ là khoảng trắng", null);
-      }
       //check otp & email exists
       var user = await _userRepository.GetUserByEmailAsync(request.Email.ToLower());
       if (user == null)
@@ -146,11 +125,6 @@ namespace SocialMedia.Services
 
     public async Task<ApiResponse<ForgetPasswordResponseDto>> ForgetPassword(ForgetPasswordRequestDto request)
     {
-      //check request
-      if (string.IsNullOrWhiteSpace(request.Email))
-      {
-        return new ApiResponse<ForgetPasswordResponseDto>(400, "Email hoặc đang là khoảng trống", null);
-      }
       //check user exists
       var user = await _userRepository.GetUserByEmailAsync(request.Email.ToLower());
       if (user == null)
@@ -168,11 +142,6 @@ namespace SocialMedia.Services
 
     public async Task<ApiResponse<VerifyForgetPasswordResponseDto>> VerifyForgetPasword(VerifyForgetPasswordRequestDto request)
     {
-      //check request
-      if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Otp))
-      {
-        return new ApiResponse<VerifyForgetPasswordResponseDto>(400, "Email & Otp đang là khoảng trống", null);
-      }
       //check email & otp exists
       var user = await _userRepository.GetUserByEmailAsync(request.Email.ToLower());
       if (user == null)
@@ -194,15 +163,6 @@ namespace SocialMedia.Services
 
     public async Task<ApiResponse<string>> ChangePassword(ChangePasswordRequestDto request)
     {
-      //check request
-      if (string.IsNullOrWhiteSpace(request.NewPassword) || string.IsNullOrWhiteSpace(request.ConfirmPassword))
-      {
-        return new ApiResponse<string>(400, "Mật khẩu mới hoặc xác nhận mật khẩu đang là khoảng trống", null);
-      }
-      if (request.NewPassword != request.ConfirmPassword)
-      {
-        return new ApiResponse<string>(400, "Mật khẩu xác nhận không khớp", null);
-      }
       //get user email from token
       var email = GetCurrentUserEmail();
       if (string.IsNullOrEmpty(email))

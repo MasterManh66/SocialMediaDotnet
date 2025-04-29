@@ -6,12 +6,7 @@ namespace SocialMedia.Repositories
 {
   public class SqlUserRepository : SqlGenericRepository<User>, IUserRepository
   {
-    private readonly AppDbContext _context;
-
-    public SqlUserRepository(AppDbContext context) : base(context)
-    {
-      _context = context;
-    }
+    public SqlUserRepository(AppDbContext context) : base(context) {}
     public async Task<User?> GetUserById(int userId)
     {
       return await _context.Users

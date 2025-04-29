@@ -157,16 +157,7 @@ namespace SocialMedia.Services
       var post = await _postRepository.GetPostsByUserId(user.Id);
       var infoUser = await _userRepository.GetUserById(user.Id);
       string author = $"{infoUser!.FirstName} {infoUser.LastName}";
-      var postResponses = post.Select(p => new PostDto
-      {
-        Id = p.Id,
-        Title = p.Title,
-        Content = p.Content,
-        ImageUrl = p.ImageUrl,
-        PostStatus = p.PostStatus,
-        UserId = p.UserId,
-        Author = author
-      }).ToList();
+      var postResponses = _mapper.Map<List<PostDto>>(post);
       return new ApiResponse<List<PostDto>>(200, $"Lấy thành công danh sách bài viết của người dùng {author}!", postResponses);
     }
     public async Task<ApiResponse<string>> DeletePost(int postId)
@@ -216,16 +207,7 @@ namespace SocialMedia.Services
       }
       //search
       var post = await _postRepository.SearchPostByKey(keyWord);
-      var postResponses = post.Select(p => new PostDto
-      {
-        Id = p.Id,
-        Title = p.Title,
-        Content = p.Content,
-        ImageUrl = p.ImageUrl,
-        PostStatus = p.PostStatus,
-        UserId = p.UserId,
-        Author = (p.User != null) ? $"{p.User.FirstName} {p.User.LastName}" : "Anonymous"
-      }).ToList();
+      var postResponses = _mapper.Map<List<PostDto>>(post);
       if (postResponses.Count > 0) 
       {
         return new ApiResponse<List<PostDto>>(200, $"Tìm kiếm theo từ khoá {keyWord} thành công !", postResponses);
@@ -263,16 +245,7 @@ namespace SocialMedia.Services
       {
         return new ApiResponse<List<PostDto>>(404, "Timeline không có bài viết mới nào!", null);
       }
-      var postResponse = allPosts.Select(p => new PostDto
-      {
-        Id = p.Id,
-        Title = p.Title,
-        Content = p.Content,
-        ImageUrl = p.ImageUrl,
-        UserId = p.UserId,
-        Author = "Anonymus",
-        PostStatus = p.PostStatus
-      }).ToList();
+      var postResponse = _mapper.Map<List<PostDto>>(allPosts);
       return new ApiResponse<List<PostDto>>(200, "Lấy thành công danh sách Time Line của bạn!", postResponse);
     }
   }

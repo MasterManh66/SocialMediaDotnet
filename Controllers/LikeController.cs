@@ -19,10 +19,6 @@ namespace SocialMedia.Controllers
     [HttpPost("LikePost")]
     public async Task<IActionResult> LikePost([FromQuery] AddLikeRequestDto request)
     {
-      if (!ModelState.IsValid)
-      {
-        return BadRequest(ModelState);
-      }
       var response = await _likeService.LikePost(request);
       if(response.Status == 201)
       {
@@ -45,10 +41,6 @@ namespace SocialMedia.Controllers
     [HttpDelete("UnlikePost")]
     public async Task<IActionResult> UnlikePost([FromQuery] AddLikeRequestDto request)
     {
-      if (!ModelState.IsValid)
-      {
-        return BadRequest(ModelState);
-      }
       var response = await _likeService.UnlikePost(request);
       if (response.Status != 201)
       {

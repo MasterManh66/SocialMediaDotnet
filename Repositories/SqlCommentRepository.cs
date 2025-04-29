@@ -6,11 +6,7 @@ namespace SocialMedia.Repositories
 {
   public class SqlCommentRepository : SqlGenericRepository<Comment>, ICommentRepository
   {
-    private readonly AppDbContext _context;
-    public SqlCommentRepository(AppDbContext context) : base(context)
-    {
-      _context = context;
-    }
+    public SqlCommentRepository(AppDbContext context) : base(context) {}
     public async Task<Comment?> GetCommentById(int id)
     {
       return await _context.Comments

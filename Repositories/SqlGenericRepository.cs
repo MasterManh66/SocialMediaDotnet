@@ -5,7 +5,7 @@ namespace SocialMedia.Repositories
 {
   public class SqlGenericRepository<T> : IGenericRepository<T> where T : class
   {
-    private readonly AppDbContext _context;
+    protected readonly AppDbContext _context;
     private readonly DbSet<T> _dbSet;
     public SqlGenericRepository(AppDbContext context) 
     { 

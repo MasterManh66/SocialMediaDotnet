@@ -9,8 +9,8 @@ namespace SocialMedia.Controllers
   [Route("[controller]")]
   public class CommentController : ControllerBase
   {
-    private readonly CommentService _commentService;
-    public CommentController(CommentService commentService)
+    private readonly ICommentService _commentService;
+    public CommentController(ICommentService commentService)
     {
       _commentService = commentService;
     }

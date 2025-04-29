@@ -19,10 +19,6 @@ namespace SocialMedia.Controllers
     [HttpPost("RegisterUser")]
     public async Task<IActionResult> RegisterUser([FromBody] RegisterUserRequestDto request)
     {
-      if (!ModelState.IsValid)
-      {
-        return BadRequest(ModelState);
-      }
       var response = await _userService.RegisterUser(request);
       if (response.Status == 201)
       {
@@ -34,10 +30,6 @@ namespace SocialMedia.Controllers
     [HttpPost("LoginUser")]
     public async Task<IActionResult> LoginUser([FromBody] LoginUserRequestDto request)
     {
-      if (!ModelState.IsValid)
-      {
-        return BadRequest(ModelState);
-      }
       var response = await _userService.LoginUser(request);
       if (response.Status == 200)
       {
@@ -49,10 +41,6 @@ namespace SocialMedia.Controllers
     [HttpPost("VerifyOtp")]
     public async Task<IActionResult> VerifyOtp([FromBody] AuthUserRequestDto request)
     {
-      if (!ModelState.IsValid)
-      {
-        return BadRequest(ModelState);
-      }
       var response = await _userService.VerifyOtp(request);
       if (response.Status == 200)
       {
@@ -64,10 +52,6 @@ namespace SocialMedia.Controllers
     [HttpPost("ForgetPassword")]
     public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordRequestDto request)
     {
-      if (!ModelState.IsValid)
-      {
-        return BadRequest(ModelState);
-      }
       var response = await _userService.ForgetPassword(request);
       if (response.Status == 200)
       {
@@ -79,10 +63,6 @@ namespace SocialMedia.Controllers
     [HttpPost("VerifyForgetPassword")]
     public async Task<IActionResult> VerifyForgetPassword([FromBody] VerifyForgetPasswordRequestDto request)
     {
-      if (!ModelState.IsValid)
-      {
-        return BadRequest(ModelState);
-      }
       var response = await _userService.VerifyForgetPasword(request);
       if (response.Status == 200)
       {
@@ -95,10 +75,6 @@ namespace SocialMedia.Controllers
     [HttpPut("ChangePassword")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto request)
     {
-      if (!ModelState.IsValid)
-      {
-        return BadRequest(ModelState);
-      }
       var response = await _userService.ChangePassword(request);
       if (response.Status == 200)
       {

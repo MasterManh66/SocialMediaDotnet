@@ -10,6 +10,5 @@ namespace SocialMedia.Models.Dto.Post
     public string? ImageUrl { get; set; }
     public PostEnum? PostStatus { get; set; }
     public int UserId { get; set; }
-    public string? Author { get; set; }
   }
 }

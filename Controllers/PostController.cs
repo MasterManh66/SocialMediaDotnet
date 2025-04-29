@@ -18,10 +18,6 @@ namespace SocialMedia.Controllers
     [HttpPost("CreatPost")]
     public async Task<IActionResult> CreatePost([FromForm] AddPostRequestDto request)
     {
-      if (!ModelState.IsValid)
-      {
-        return BadRequest(ModelState);
-      }
       var response = await _postService.CreatePost(request);
       if (response.Status == 201)
       {
@@ -33,10 +29,6 @@ namespace SocialMedia.Controllers
     [HttpPut("UpdatePost")]
     public async Task<IActionResult> UpdatePost([FromForm] UpdatePostRequestDto request)
     {
-      if (!ModelState.IsValid)
-      {
-        return BadRequest(ModelState);
-      }
       var response = await _postService.UpdatePost(request);
       if (response.Status != 200)
       {

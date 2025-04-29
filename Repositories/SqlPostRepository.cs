@@ -6,11 +6,7 @@ namespace SocialMedia.Repositories
 {
   public class SqlPostRepository : SqlGenericRepository<Post>, IPostRepository
   {
-    private readonly AppDbContext _context;
-    public SqlPostRepository(AppDbContext context) : base(context)
-    {
-      _context = context;
-    }
+    public SqlPostRepository(AppDbContext context) : base(context) {}
 
     public async Task<Post?> GetPostById(int id)
     {

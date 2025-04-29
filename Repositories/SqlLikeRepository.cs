@@ -6,11 +6,7 @@ namespace SocialMedia.Repositories
 {
   public class SqlLikeRepository : SqlGenericRepository<Like>, ILikeRepository
   {
-    private readonly AppDbContext _context;
-    public SqlLikeRepository(AppDbContext context) : base(context)
-    {
-      _context = context;
-    }
+    public SqlLikeRepository(AppDbContext context) : base(context) {}
     public async Task<Like?> GetLikeById(int id)
     {
       return await _context.Likes

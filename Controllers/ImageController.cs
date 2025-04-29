@@ -16,10 +16,6 @@ namespace SocialMedia.Controllers
     [HttpPost("Upload")]
     public async Task<IActionResult> UploadImage([FromForm] UploadImageRequest request)
     {
-      if (!ModelState.IsValid)
-      {
-        return BadRequest(ModelState);
-      }
       var response = await _imageService.UploadImage(request);
       if (response.Status == 201)
       {

@@ -10,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 using SocialMedia.Mappings;
+using YourProjectName.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 var redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? throw new ArgumentNullException("Redis connection string is missing");
@@ -19,7 +20,10 @@ var jwtSecretKey = Encoding.UTF8.GetBytes(jwtKey);
 
 // Add services to the container.
 
-builder.Services.AddControllers()
+builder.Services.AddControllers(options =>
+  {
+    options.Filters.Add<ValidationFilter>();
+  })
   .AddJsonOptions(options =>
   {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
@@ -44,6 +48,7 @@ builder.Services.AddScoped<ILikeService, LikeService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IFriendService, FriendService>();
 builder.Services.AddScoped<RedisService>();
+builder.Services.AddScoped<ValidationFilter>();
 
 //Add Auto Mapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));

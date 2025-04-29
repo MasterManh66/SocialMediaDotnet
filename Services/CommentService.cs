@@ -48,15 +48,7 @@ namespace SocialMedia.Services
       {
         return new ApiResponse<CommentDto>(404, "Người dùng không tồn tại!", null);
       }
-      //check request
-      if (request.PostId <= 0 || request.PostId == 0)
-      {
-        return new ApiResponse<CommentDto>(400, "ID bài viết không hợp lệ!", null);
-      }
-      if (string.IsNullOrEmpty(request.Content))
-      {
-        return new ApiResponse<CommentDto>(400, "Nội dung không được để trống!", null);
-      }
+      //check post
       var post = await _postRepository.GetPostById(request.PostId);
       if (post == null || request.PostId != post.Id)
       {

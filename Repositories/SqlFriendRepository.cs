@@ -7,11 +7,7 @@ namespace SocialMedia.Repositories
 {
   public class SqlFriendRepository : SqlGenericRepository<Friend>, IFriendRepository
   {
-    private readonly AppDbContext _context;
-    public SqlFriendRepository(AppDbContext context) : base(context)
-    {
-      _context = context;
-    }
+    public SqlFriendRepository(AppDbContext context) : base(context) {}
     public async Task<List<Friend>> GetFriendsByUserId(int userId)
     {
       return await _context.Friends
