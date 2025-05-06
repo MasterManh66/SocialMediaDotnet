@@ -11,19 +11,17 @@ namespace SocialMedia.Services
   {
     private readonly ICommentRepository _commentRepository;
     private readonly IPostRepository _postRepository;
-    private readonly IUserService _userService;
     private readonly IUserRepository _userRepository;
     private readonly IImageService _imageService;
     private readonly IMapper _mapper;
     private readonly IHttpContextAccessor _httpContextAccessor;
     public CommentService(IHttpContextAccessor httpContextAccessor, ICommentRepository commentRepository, IUserRepository userRepository
-                      , IPostRepository postRepository, IUserService userService, IImageService imageService, IMapper mapper)
+                      , IPostRepository postRepository, IImageService imageService, IMapper mapper)
     {
       _httpContextAccessor = httpContextAccessor;
       _commentRepository = commentRepository;
       _userRepository = userRepository;
       _postRepository = postRepository;
-      _userService = userService;
       _imageService = imageService;
       _mapper = mapper;
     }
@@ -35,7 +33,7 @@ namespace SocialMedia.Services
     {
       return _userRepository.GetByEmailAsync(email);
     }
-    public async Task<ApiResponse<CommentDto>> CommentPost(AddCommentRequestDto request)
+    public async Task<ApiResponse<CommentDto>> CreateComment(AddCommentRequestDto request)
     {
       //check user
       var email = GetCurrentUserEmail();
@@ -54,7 +52,6 @@ namespace SocialMedia.Services
       {
         return new ApiResponse<CommentDto>(404, "Bài viết không tồn tại!", null);
       }
-      var author = post.User != null ? $"{post.User.FirstName} {post.User.LastName}" : "Anonymous";
       //check image
       string? imageUrl = null;
       if (request.ImageUrl != null)
@@ -68,6 +65,8 @@ namespace SocialMedia.Services
       }
       //created Comment
       var newComment = _mapper.Map<Comment>(request);
+      newComment.ImageUrl = imageUrl;
+      newComment.UserId = user.Id;
       //add database
       await _commentRepository.AddAsync(newComment);
       var response = _mapper.Map<CommentDto>(newComment);
@@ -110,8 +109,8 @@ namespace SocialMedia.Services
         return new ApiResponse<CommentDto>(404, "Người dùng không tồn tại!", null);
       }
       //check comment
-      var comment = await _commentRepository.GetCommentById(request.Id);
-      if (comment == null || request.Id != comment.Id)
+      var comment = await _commentRepository.GetCommentById(request.CommentId);
+      if (comment == null || request.CommentId != comment.Id)
       {
         return new ApiResponse<CommentDto>(404, "Bình luận không tồn tại!", null);
       }

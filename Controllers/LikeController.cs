@@ -17,9 +17,9 @@ namespace SocialMedia.Controllers
     }
     [Authorize]
     [HttpPost("LikePost")]
-    public async Task<IActionResult> LikePost([FromQuery] AddLikeRequestDto request)
+    public async Task<IActionResult> CreateLike([FromQuery] AddLikeRequestDto request)
     {
-      var response = await _likeService.LikePost(request);
+      var response = await _likeService.CreateLike(request);
       if(response.Status == 201)
       {
         return Ok(response);

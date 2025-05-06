@@ -16,9 +16,9 @@ namespace SocialMedia.Controllers
     }
     [Authorize]
     [HttpPost("CommentPost")]
-    public async Task<IActionResult> CommentPost([FromForm] AddCommentRequestDto request)
+    public async Task<IActionResult> CreateComment([FromForm] AddCommentRequestDto request)
     {
-      var response = await _commentService.CommentPost(request);
+      var response = await _commentService.CreateComment(request);
       if (response.Status != 201)
       {
         return StatusCode(response.Status, response);

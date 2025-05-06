@@ -7,7 +7,8 @@ namespace SocialMedia.Models.Dto.Comment
     public string? Content { get; set; }
     public IFormFile? ImageUrl { get; set; }
 
-    [MinLength(1, ErrorMessage = "PostId bài viết không hợp lệ!")]
+    [Required(ErrorMessage = "PostId không được để trống!")]
+    [Range(1, int.MaxValue, ErrorMessage = "PostId bài viết không hợp lệ!")]
     public int PostId { get; set; }
   }
 }

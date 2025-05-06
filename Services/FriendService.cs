@@ -79,6 +79,12 @@ namespace SocialMedia.Services
       //add database
       await _friendRepository.AddAsync(newFriend);
       var response = _mapper.Map<FriendDto>(newFriend);
+      response.UserId = ReceiverId;
+      response.FullName = $"{receiver.FirstName} {receiver.LastName}";
+      response.Avatar = receiver.ImageUrl;
+      response.Address = receiver.Address;
+      response.Job = receiver.Job;
+      response.Gender = receiver.Gender;
       return new ApiResponse<FriendDto>(201, $"Bạn đã gửi lời mời kết bạn cho người dùng {ReceiverId} thành công!", response);
     }
     public async Task<ApiResponse<List<FriendDto>>> GetFriendsRequest()

@@ -192,11 +192,11 @@ namespace SocialMedia.Services
       }
       //get user by email
       var user = await GetUserByEmailAsync(email);
-      var response = _mapper.Map<UserDto>(user);
       if (user == null)
       {
         return new ApiResponse<UserDto>(404, "Người dùng không tồn tại!", null);
       }
+      var response = _mapper.Map<UserDto>(user);
       return new ApiResponse<UserDto>(200, "Lấy thành công thông tin của bạn", response);
     }
 

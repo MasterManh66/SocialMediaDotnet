@@ -35,7 +35,7 @@ namespace SocialMedia.Services
     {
       return _postRepository.GetPostById(postId);
     }
-    public async Task<ApiResponse<LikeDto>> LikePost(AddLikeRequestDto request)
+    public async Task<ApiResponse<LikeDto>> CreateLike(AddLikeRequestDto request)
     {
       //check user
       var email = GetCurrentUserEmail();
@@ -57,6 +57,7 @@ namespace SocialMedia.Services
       var author = post.User != null ? $"{post.User.FirstName} {post.User.LastName}" : "Anonymous";
       //create like
       var newLike = _mapper.Map<Like>(request);
+      newLike.UserId = user.Id;
       //add database
       await _likeRepository.AddAsync(newLike);
       var response = _mapper.Map<LikeDto>(newLike);

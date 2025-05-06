@@ -5,7 +5,7 @@ namespace SocialMedia.Services
 {
   public interface ICommentService
   {
-    Task<ApiResponse<CommentDto>> CommentPost(AddCommentRequestDto request);
+    Task<ApiResponse<CommentDto>> CreateComment(AddCommentRequestDto request);
     Task<ApiResponse<List<CommentDto>>> CommentsOfUser();
     Task<ApiResponse<CommentDto>> EditComment(UpdateCommentRequestDto request);
     Task<ApiResponse<CommentDto>> DeleteComment(int commentId);

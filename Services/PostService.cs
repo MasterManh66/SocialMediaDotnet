@@ -10,7 +10,6 @@ namespace SocialMedia.Services
 {
   public class PostService : IPostService
   {
-    private readonly IUserService _userService;
     private readonly IPostRepository _postRepository;
     private readonly IImageService _imageService;
     private readonly IUserRepository _userRepository;
@@ -18,10 +17,9 @@ namespace SocialMedia.Services
     private readonly IMapper _mapper;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public PostService(IUserRepository userRepository,IUserService userService, IPostRepository postRepository, IMapper mapper, 
+    public PostService(IUserRepository userRepository, IPostRepository postRepository, IMapper mapper, 
                       IImageService imageService, IHttpContextAccessor httpContextAccessor, IFriendRepository friendRepository)
     {
-      _userService = userService;
       _postRepository = postRepository;
       _userRepository = userRepository;
       _imageService = imageService;
@@ -50,8 +48,6 @@ namespace SocialMedia.Services
       {
         return new ApiResponse<PostDto>(404, "Người dùng không tồn tại!", null);
       }
-      var infoUser = await _userRepository.GetUserById(user.Id);
-      string author = $"{infoUser!.FirstName} {infoUser.LastName}";
       //check request
       if (string.IsNullOrWhiteSpace(request.Title) || string.IsNullOrWhiteSpace(request.Content))
       {
@@ -70,6 +66,8 @@ namespace SocialMedia.Services
       }
       //created Post
       var newPost = _mapper.Map<Post>(request);
+      newPost.ImageUrl = imageUrl;
+      newPost.UserId = user.Id;
       //add database
       await _postRepository.AddAsync(newPost);
       var response = _mapper.Map<PostDto>(newPost);
@@ -110,7 +108,7 @@ namespace SocialMedia.Services
       }
       if (user.Id != post.UserId)
       {
-        return new ApiResponse<PostDto>(403, $"Bạn không có quyền chỉnh sửa bài viết của {user.FirstName + "" + user.LastName}", null);
+        return new ApiResponse<PostDto>(403, $"Bạn không có quyền chỉnh sửa bài viết của {author}", null);
       }
       if (!string.IsNullOrEmpty(request.Title) && request.Title != post.Title)
       {
