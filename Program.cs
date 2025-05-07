@@ -47,7 +47,7 @@ builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ILikeService, LikeService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IFriendService, FriendService>();
-builder.Services.AddScoped<RedisService>();
+builder.Services.AddScoped<IRedisService, RedisService>();
 builder.Services.AddScoped<ValidationFilter>();
 
 //Add Auto Mapper

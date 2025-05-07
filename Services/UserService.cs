@@ -20,13 +20,13 @@ namespace SocialMedia.Services
     private readonly ILikeRepository _likeRepository;
     private readonly IFriendRepository _friendRepository;
     private readonly IRoleRepository _roleRepository;
-    private readonly RedisService _redisService;
+    private readonly IRedisService _redisService;
     private readonly IJwtService _jwtService;
     private readonly IImageService _imageService;
     private readonly IMapper _mapper;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public UserService(IUserRepository userRepository, IRoleRepository roleRepository, RedisService redisService,
+    public UserService(IUserRepository userRepository, IRoleRepository roleRepository, IRedisService redisService,
                       IJwtService jwtService, IHttpContextAccessor httpContextAccessor, IImageService imageService, IMapper mapper,
                       IPostRepository postRepository, ICommentRepository commentRepository, ILikeRepository likeRepository, IFriendRepository friendRepository)
     {
