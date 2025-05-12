@@ -171,3 +171,4 @@ C:\Users\trantienmanh\Project\SocialMediaNetCore\SocialMedia.Tests\obj\Debug\net
 C:\Users\trantienmanh\Project\SocialMediaNetCore\SocialMedia.Tests\obj\Debug\net8.0\SocialMedia.Tests.pdb
 C:\Users\trantienmanh\Project\SocialMediaNetCore\SocialMedia.Tests\obj\Debug\net8.0\SocialMedia.Tests.genruntimeconfig.cache
 C:\Users\trantienmanh\Project\SocialMediaNetCore\SocialMedia.Tests\obj\Debug\net8.0\ref\SocialMedia.Tests.dll
+C:\Users\trantienmanh\Project\SocialMediaNetCore\SocialMedia.Tests\obj\Debug\net8.0\SocialMedia.Tests.sourcelink.json

@@ -133,7 +133,7 @@ namespace SocialMedia.Tests.Services
       // Arrange
       var email = "manh@gmail.com";
       var user = new User { Id = 1, Email = email, FirstName = "Nguyen", LastName = "Manh" };
-      var request = new AddLikeRequestDto { PostId = 1 };
+      var postId = 1;
       var post = new Post { Id = 1, UserId = user.Id, Title = "Test post" };
       var like = new Like
       {
@@ -153,10 +153,10 @@ namespace SocialMedia.Tests.Services
 
       _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(new DefaultHttpContext { User = principal });
       _userRepositoryMock.Setup(x => x.GetByEmailAsync(email)).ReturnsAsync(user);
-      _postRepositoryMock.Setup(x => x.GetPostById(request.PostId)).ReturnsAsync(post);
-      _likeRepositoryMock.Setup(x => x.GetLikeByUserIdAndPostId(request.PostId, user.Id)).ReturnsAsync(like);
+      _postRepositoryMock.Setup(x => x.GetPostById(postId)).ReturnsAsync(post);
+      _likeRepositoryMock.Setup(x => x.GetLikeByUserIdAndPostId(postId, user.Id)).ReturnsAsync(like);
       // Act
-      var result = await _likeService.UnlikePost(request);
+      var result = await _likeService.UnlikePost(postId);
       // Assert
       result.Status.Should().Be(200);
       result.Message.Should().Be($"Bạn đã huỷ like bài viết {post.Id} của {author} thành công!");

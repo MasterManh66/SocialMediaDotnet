@@ -7,6 +7,6 @@ namespace SocialMedia.Services
   {
     Task<ApiResponse<LikeDto>> CreateLike(AddLikeRequestDto request);
     Task<ApiResponse<List<LikeDto>>> LikeOfUser();
-    Task<ApiResponse<string>> UnlikePost(AddLikeRequestDto request);
+    Task<ApiResponse<string>> UnlikePost(int PostId);
   }
 }

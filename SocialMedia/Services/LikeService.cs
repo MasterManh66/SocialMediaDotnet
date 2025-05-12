@@ -85,7 +85,7 @@ namespace SocialMedia.Services
       var likeResponses = _mapper.Map<List<LikeDto>>(likes);
       return new ApiResponse<List<LikeDto>>(200, "Danh sách bài viết đã thích của bạn", likeResponses);
     }
-    public async Task<ApiResponse<string>> UnlikePost(AddLikeRequestDto request)
+    public async Task<ApiResponse<string>> UnlikePost(int PostId)
     {
       //check user
       var email = GetCurrentUserEmail();
@@ -99,20 +99,20 @@ namespace SocialMedia.Services
         return new ApiResponse<string>(404, "Người dùng không tồn tại!", null);
       }
       //check post
-      var post = await GetPostById(request.PostId);
+      var post = await GetPostById(PostId);
       if (post == null)
       {
-        return new ApiResponse<string>(400, $"Bài viết {request.PostId} không tồn tại!", null);
+        return new ApiResponse<string>(400, $"Bài viết {PostId} không tồn tại!", null);
       }
       var author = post.User != null ? $"{post.User.FirstName} {post.User.LastName}" : "Anonymous";
       //check authorize
-      var like = await _likeRepository.GetLikeByUserIdAndPostId(user.Id, request.PostId);
+      var like = await _likeRepository.GetLikeByUserIdAndPostId(user.Id, PostId);
       if (like == null)
       {
         return new ApiResponse<string>(404, "Bạn chưa thích bài viết này!", null);
       }
       //delete like
-      await _likeRepository.DeleteAsync(request.PostId);
+      await _likeRepository.DeleteAsync(PostId);
       return new ApiResponse<string>(200, $"Bạn đã huỷ like bài viết {post.Id} của {author} thành công!", null);
     }
   }

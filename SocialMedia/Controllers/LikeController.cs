@@ -31,7 +31,7 @@ namespace SocialMedia.Controllers
     public async Task<IActionResult> LikeOfUser()
     {
       var response = await _likeService.LikeOfUser();
-      if (response.Status != 200)
+      if (response.Status == 200)
       {
         return Ok(response);
       }
@@ -39,10 +39,10 @@ namespace SocialMedia.Controllers
     }
     [Authorize]
     [HttpDelete("UnlikePost")]
-    public async Task<IActionResult> UnlikePost([FromQuery] AddLikeRequestDto request)
+    public async Task<IActionResult> UnlikePost([FromQuery] int PostId)
     {
-      var response = await _likeService.UnlikePost(request);
-      if (response.Status != 201)
+      var response = await _likeService.UnlikePost(PostId);
+      if (response.Status == 200)
       {
         return Ok(response);
       }
